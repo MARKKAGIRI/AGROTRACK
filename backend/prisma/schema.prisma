@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  role     String
+  location String?
+  farms    Farm[]
+  advice   Advice[]
+}
+
+model Farm {
+  id       String   @id @default(uuid())
+  name     String
+  size     Float?
+  cropType String?
+  ownerId  String
+  owner    User      @relation(fields: [ownerId], references: [id])
+  crops    CropCycle[]
+}
+
+model CropCycle {
+  id           String   @id @default(uuid())
+  cropName     String
+  plantingDate DateTime
+  harvestDate  DateTime?
+  status       String
+  farmId       String
+  farm         Farm     @relation(fields: [farmId], references: [id])
+  tasks        Task[]
+}
+
+model Task {
+  id      String   @id @default(uuid())
+  title   String
+  dueDate DateTime
+  status  String
+  cropId  String
+  crop    CropCycle @relation(fields: [cropId], references: [id])
+}
+
+model Advice {
+  id        String   @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
