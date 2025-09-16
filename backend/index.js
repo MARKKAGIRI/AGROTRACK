@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
 const { PrismaClient } = require('./generated/prisma/client')
+const errorHandler = require('./middleware/errorHandler')
 
 
 const app = express();
@@ -26,6 +27,10 @@ app.get("/db-check", async (req, res) => {
     res.status(500).json({ error: "Database connection failed" });
   }
 });
+
+
+// error handler middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 4000;
 
