@@ -29,6 +29,8 @@ app.get("/db-check", async (req, res) => {
 });
 
 
+app.use('/api/users', require('./routes/userRoutes'));
+
 // error handler middleware
 app.use(errorHandler);
 

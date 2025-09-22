@@ -13,7 +13,7 @@
     "@expo/vector-icons": "^14.1.0",
     "@react-navigation/bottom-tabs": "^7.4.7",
     "@react-navigation/native": "^7.1.17",
-    "expo": "~53.0.20",
+    "expo": "^54.0.7",
     "expo-linear-gradient": "~14.1.5",
     "expo-status-bar": "~2.2.3",
     "nativewind": "^4.1.23",
