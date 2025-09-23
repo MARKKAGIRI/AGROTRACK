@@ -1,14 +1,15 @@
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
-const { PrismaClient } = require('./generated/prisma/client')
+const { PrismaClient } = require('./generated/prisma')
 const errorHandler = require('./middleware/errorHandler')
+const routes  = require('./routes/userRoutes')
 
 
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+app.use(cors()); 
 app.use(express.json());
 
 // Simple health check
@@ -28,6 +29,7 @@ app.get("/db-check", async (req, res) => {
   }
 });
 
+app.use('/api/users',  routes.router)
 
 // error handler middleware
 app.use(errorHandler);
