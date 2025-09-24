@@ -12,22 +12,6 @@ const prisma = new PrismaClient();
 app.use(cors()); 
 app.use(express.json());
 
-// Simple health check
-app.get("/", (req, res) => {
-  res.json({ message: "AgroTrack+ backend is running" });
-});
-
-// Quick DB check
-app.get("/db-check", async (req, res) => {
-  try {
-    // Try to count users
-    const count = await prisma.user.count();
-    res.json({ message: "Database connected", users: count });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Database connection failed" });
-  }
-});
 
 app.use('/api/users',  routes.router)
 
