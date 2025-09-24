@@ -192,162 +192,6 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-// Get comprehensive user profile with related data
-const getFullUserProfile = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'User ID is required'
-      });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        location: true,
-        farms: {
-          select: {
-            id: true,
-            name: true,
-            size: true,
-            cropType: true,
-            crops: {
-              select: {
-                id: true,
-                cropName: true,
-                plantingDate: true,
-                harvestDate: true,
-                status: true,
-                tasks: {
-                  select: {
-                    id: true,
-                    title: true,
-                    dueDate: true,
-                    status: true
-                  }
-                }
-              }
-            }
-          }
-        },
-        advice: {
-          select: {
-            id: true,
-            message: true,
-            createdAt: true
-          },
-          orderBy: {
-            createdAt: 'desc'
-          },
-          take: 10 // Limit to recent 10 advice entries
-        }
-      }
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Calculate some statistics
-    const totalFarms = user.farms.length;
-    const totalCrops = user.farms.reduce((acc, farm) => acc + farm.crops.length, 0);
-    const activeCrops = user.farms.reduce((acc, farm) => {
-      return acc + farm.crops.filter(crop => crop.status === 'active').length;
-    }, 0);
-    const pendingTasks = user.farms.reduce((acc, farm) => {
-      return acc + farm.crops.reduce((cropAcc, crop) => {
-        return cropAcc + crop.tasks.filter(task => task.status === 'pending').length;
-      }, 0);
-    }, 0);
-
-    const profileData = {
-      ...user,
-      statistics: {
-        totalFarms,
-        totalCrops,
-        activeCrops,
-        pendingTasks,
-        totalAdvice: user.advice.length
-      }
-    };
-
-    res.status(200).json({
-      success: true,
-      data: profileData
-    });
-
-  } catch (error) {
-    console.error('Error fetching full user profile:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    });
-  }
-};
-
-// Get user profile summary (lightweight version)
-const getUserProfileSummary = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        location: true,
-        _count: {
-          select: {
-            farms: true,
-            advice: true
-          }
-        }
-      }
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: {
-        ...user,
-        farmsCount: user._count.farms,
-        adviceCount: user._count.advice
-      }
-    });
-
-  } catch (error) {
-    console.error('Error fetching user profile summary:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    });
-  }
-};
-
 // Update user profile
 const updateUserProfile = async (req, res) => {
   try {
@@ -423,7 +267,7 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-// Get all users (for admin purposes)
+// admin level control
 const getAllUsers = async (req, res) => {
   try {
     const { page = 1, limit = 10, role, search } = req.query;
@@ -494,8 +338,6 @@ module.exports = {
   login,
   register,
   getUserProfile,
-  getFullUserProfile,
-  getUserProfileSummary,
   updateUserProfile,
   getAllUsers
 };

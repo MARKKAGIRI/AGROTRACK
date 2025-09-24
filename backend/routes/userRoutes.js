@@ -1,35 +1,32 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const {tokenValidator, adminAuthorisation} = require("../middleware/authMiddleware")
 
-const {login , register} = require('../controllers/userController')
 const {
+  login,
+  register,
   getUserProfile,
-  getFullUserProfile,
-  getUserProfileSummary,
   updateUserProfile,
-  getAllUsers
-} = require('../controllers/userController');
-
-
-// public route
-router.post('/login', login);
+  getAllUsers,
+} = require("../controllers/userController");
 
 // public route
-router.post('/register', register);
+router.post("/login", login);
 
-// GET /api/users - Get all users (with pagination and filtering)
-router.get('/', getAllUsers);
+// public route
+router.post("/register", register);
 
-// GET /api/users/:userId - Get basic user profile
-router.get('/:userId', getUserProfile);
+// private route
+router.get("/:userId", tokenValidator, getUserProfile);
 
-// GET /api/users/:userId/full - Get comprehensive user profile with related data
-router.get('/:userId/full', getFullUserProfile);
 
-// GET /api/users/:userId/summary - Get user profile summary (lightweight)
-router.get('/:userId/summary', getUserProfileSummary);
+// private route
+router.put("/:userId", tokenValidator, updateUserProfile);
 
-// PUT /api/users/:userId - Update user profile
-router.put('/:userId', updateUserProfile);
+// admin route
+router.get("/admin/allUsers", tokenValidator, adminAuthorisation, getAllUsers);
+
+
+
 
 module.exports = router;
