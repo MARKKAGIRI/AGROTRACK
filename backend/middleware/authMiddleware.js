@@ -9,7 +9,7 @@ const tokenValidator = async (req, res, next) => {
 
       jwt.verify(token, process.env.jwtSecret, (err, decoded) => {
         if (err) {
-          return res.status(401).json({ error: "Unauthorized" });
+          return res.status(401).json({ error: "Unauthorized", message: err.message });
         }
 
         req.user = decoded;
