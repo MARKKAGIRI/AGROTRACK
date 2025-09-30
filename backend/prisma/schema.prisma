@@ -23,6 +23,7 @@ model Farm {
   id       String      @id @default(uuid())
   name     String
   size     Float?
+  location String
   cropType String?
   ownerId  String
   location String
