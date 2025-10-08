@@ -44,6 +44,8 @@ model CropCycle {
 model Crops {
   id          Int      @id @default(autoincrement())
   cropName    String   @unique
+  cropType    String
+  region      String
   growthData  Json     
   createdAt   DateTime @default(now())
 }
