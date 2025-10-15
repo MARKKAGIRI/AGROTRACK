@@ -14,6 +14,7 @@ app.use(express.json());
 
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/farms', require('./routes/farmRoutes'));
+app.use('/api/cropCycle', require('./routes/cropCycleRoutes'));
 
 // error handler middleware
 app.use(errorHandler);
