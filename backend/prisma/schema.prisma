@@ -23,9 +23,9 @@ model Farm {
   id       String      @id @default(uuid())
   name     String
   size     Float?
-  location String
   cropType String?
   ownerId  String
+  location String
   crops    CropCycle[]
   owner    User        @relation(fields: [ownerId], references: [id])
 }
@@ -42,14 +42,13 @@ model CropCycle {
 }
 
 model Crops {
-  id          Int      @id @default(autoincrement())
-  cropName    String   @unique
-  cropType    String
-  region      String
-  growthData  Json     
-  createdAt   DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  cropName   String   @unique
+  cropType   String
+  region     String
+  growthData Json
+  createdAt  DateTime @default(now())
 }
-
 
 model Task {
   id      String    @id @default(uuid())
