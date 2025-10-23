@@ -13,7 +13,7 @@ import Profile from "../screens/Profile/Profile";
 
 const Tab = createBottomTabNavigator();
 
-const AppNavigator = () => {
+const MainStack = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -89,4 +89,4 @@ const AppNavigator = () => {
   );
 };
 
-export default AppNavigator;
+export default MainStack;
