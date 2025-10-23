@@ -1,5 +1,4 @@
-import { ActivityIndicator, View, Text } from "react-native";
-import React from "react";
+import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { NavigationContainer } from "@react-navigation/native";
 import MainStack from "./MainStack";
@@ -15,9 +14,11 @@ const RootNavigator = () => {
       </View>
     );
   }
-  return user ? <MainStack /> : <AuthStack />;
-    
-  ;
+  return (
+    <NavigationContainer>
+      {user ? <MainStack /> : <AuthStack />}
+    </NavigationContainer>
+  );
 };
 
 export default RootNavigator;

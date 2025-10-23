@@ -15,6 +15,10 @@ app.use(express.json());
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/farms', require('./routes/farmRoutes'));
 app.use('/api/cropCycle', require('./routes/cropCycleRoutes'));
+app.get('/api/test', (req, res) => {
+  console.log('✅ /test route was hit from mobile!');
+  res.json({ status: 'ok', message: 'Connection successful!' });
+});
 
 // error handler middleware
 app.use(errorHandler);

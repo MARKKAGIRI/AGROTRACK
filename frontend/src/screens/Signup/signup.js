@@ -14,9 +14,11 @@ import { StatusBar } from "expo-status-bar";
 import { registerUser } from "../../services/authServices";
 import { useAuth } from "../../context/AuthContext";
 import { ActivityIndicator } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Register() {
   const { login } = useAuth();
+  const navigation = useNavigation()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -128,7 +130,7 @@ export default function Register() {
         </View>
 
         {/* Form */}
-        <View className="-top-10 bg-white rounded-3xl p-8 shadow-md">
+        <View className="-top-10 bg-white rounded-3xl p-8 shadow-lg">
           <Text className="text-center text-xl font-semibold text-gray-700 mb-6">
             Create Your Account
           </Text>
@@ -309,12 +311,14 @@ export default function Register() {
             </Text>
           </TouchableOpacity>
 
-          {/* Sign In Link */}
+          {/* Sign In Page Link */}
           <View className="flex-row justify-center items-center mt-6">
             <Text className="text-sm text-gray-600">
               Already have an account?{" "}
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+            onPress={() => {navigation.navigate("Login")}}
+            >
               <Text className="text-sm font-semibold text-green-600">
                 Sign In
               </Text>
