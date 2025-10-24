@@ -11,13 +11,15 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { StatusBar } from "expo-status-bar";
-import { registerUser } from "../../services/authServices";
+import { registerUser, sendGoogleTokenToBackend } from "../../services/authServices";
 import { useAuth } from "../../context/AuthContext";
 import { ActivityIndicator } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import { useGoogleAuth } from "../../hooks/useGoogleAuth";
 
 export default function Register() {
   const { login } = useAuth();
+  const [isVerifying, setIsVerifying] = useState(false)
   const navigation = useNavigation()
 
   const [formData, setFormData] = useState({
@@ -32,7 +34,7 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(true);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isRegisterButtonLoading, setIsRegisterButtonLoading] = useState(false);
 
   const handleChange = (fieldName, value) => {
     const updatedFormData = { ...formData, [fieldName]: value };
@@ -92,7 +94,7 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     try {
-      setLoading(true);
+      setIsRegisterButtonLoading(true);
       const isDataValid = validateForm(formData);
       if (isDataValid.valid !== true) {
         console.warn(isDataValid); // show validation message
@@ -104,9 +106,29 @@ export default function Register() {
     } catch (error) {
       console.error("Register error", error);
     } finally {
-      setLoading(false);
+      setIsRegisterButtonLoading(false);
     }
   };
+
+  const handleGoogleAuthComplete =  async (googleIdToken) => {
+      setIsVerifying(true)
+      try {
+        const { token, user } = await sendGoogleTokenToBackend(googleIdToken);
+  
+        await login(user, token)
+  
+        console.log("Google Login Successful!")
+      } catch (error) {
+        Alert.alert("Login Failed", error.message);
+      }finally{
+        setIsVerifying(false)
+      }
+    };
+  
+    // initialize google auth hook with the callback
+    const { signIn: PromptGoogleSignIn, isLoading: isGoogleLoading} = useGoogleAuth(handleGoogleAuthComplete)
+  
+    const isLoading = isGoogleLoading || isVerifying;
 
   return (
     <SafeAreaView
@@ -283,7 +305,7 @@ export default function Register() {
             activeOpacity={0.8}
             className={`${isLoginButtonDisabled ? "bg-gray-300" : "bg-green-600"} rounded-xl py-4 items-center shadow-md`}
           >
-            {loading ? (
+            {isRegisterButtonLoading ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
               <Text className="text-white text-base font-semibold">
@@ -300,7 +322,10 @@ export default function Register() {
           </View>
 
           {/* Google Button */}
-          <TouchableOpacity className="flex-row items-center justify-center bg-white border border-gray-300 rounded-xl py-4">
+          <TouchableOpacity 
+          disabled={isLoading}
+          onPress={PromptGoogleSignIn}
+          className="flex-row items-center justify-center bg-white border border-gray-300 rounded-xl py-4">
             <Image
               source={require("../../assets/images/google.png")}
               className="w-6 h-6 mr-3"

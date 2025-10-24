@@ -12,21 +12,20 @@ import {
 import { ActivityIndicator } from "react-native-paper";
 import { StatusBar } from "expo-status-bar";
 import {
-  MaterialCommunityIcons,
   Feather,
-  FontAwesome,
   Ionicons,
 } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useNavigation } from "@react-navigation/native";
-import { loginUser } from "../../services/authServices";
+import { loginUser, sendGoogleTokenToBackend } from "../../services/authServices";
 import { useAuth } from "../../context/AuthContext";
+import { useGoogleAuth } from "../../hooks/useGoogleAuth";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const THEME_GREEN = "#4A8B5C";
 
 export default function Login() {
   const { login } = useAuth();
+  const [isVerifying, setIsVerifying] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -36,7 +35,7 @@ export default function Login() {
  
   const [secureEntry, setSecureEntry] = useState(true);
   const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [isLoginButtonLoading, setIsLoginButtonLoading] = useState(false);
 
   const handleChange = (fieldName, value) => {
     const updatedFormData = { ...formData, [fieldName]: value };
@@ -64,21 +63,37 @@ export default function Login() {
   const handleSubmit = async () => {
     if (!validate()) return;
     try {
-      setLoading(true)
+      setIsLoginButtonLoading(true)
       const data = await loginUser(formData);
       login(data.user, data.token)
     } catch (error) {
        console.error("Login Failed", error);
       Alert.alert("Login Failed", "Invalid email or password. Please try again.");
     }finally{
-      setLoading(false)
+      setIsLoginButtonLoading(false)
     }
   
   };
 
-  const handleGoogle = () => {
-    Alert.alert("Google sign-in", "Google auth not implemented in demo.");
+  const handleGoogleAuthComplete =  async (googleIdToken) => {
+    setIsVerifying(true)
+    try {
+      const { token, user } = await sendGoogleTokenToBackend(googleIdToken);
+
+      await login(user, token)
+
+      console.log("Google Login Successful!")
+    } catch (error) {
+      Alert.alert("Login Failed", error.message);
+    }finally{
+      setIsVerifying(false)
+    }
   };
+
+  // initialize google auth hook with the callback
+  const { signIn: PromptGoogleSignIn, isLoading: isGoogleLoading} = useGoogleAuth(handleGoogleAuthComplete)
+
+  const isLoading = isGoogleLoading || isVerifying;
 
   const handleForgotPassword = () => {
     Alert.alert(
@@ -179,7 +194,7 @@ export default function Login() {
             activeOpacity={0.8}
             className={`${isLoginButtonDisabled ? "bg-gray-300" : "bg-green-600"} rounded-xl py-4 items-center shadow-md`}
           >
-            {loading ? (
+            {isLoginButtonLoading ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
               <Text className="text-white text-base font-semibold">
@@ -196,7 +211,10 @@ export default function Login() {
           </View>
 
           {/* Google */}
-          <TouchableOpacity className="flex-row items-center justify-center bg-white border border-gray-300 rounded-xl py-4">
+          <TouchableOpacity
+          disabled={isLoading}
+          onPress={PromptGoogleSignIn} 
+          className="flex-row items-center justify-center bg-white border border-gray-300 rounded-xl py-4">
             <Image
               source={require("../../assets/images/google.png")}
               className="w-6 h-6 mr-3"

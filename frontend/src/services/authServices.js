@@ -44,3 +44,28 @@ export const registerUser = async (userData) => {
     console.error("Registration of user failed: ", error);
   }
 };
+
+export const sendGoogleTokenToBackend = async (googleIdToken) => {
+  try {
+    const res = await fetch(`${API_URL}/auth/google`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        token: googleIdToken
+      })
+    });
+
+    if(!res.ok) {
+      const errorMessage = await res.json();
+      throw new Error(`Backend verification failed: ${errorMessage}`);
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error sending token to backend:", error);
+    throw error;
+  }
+}

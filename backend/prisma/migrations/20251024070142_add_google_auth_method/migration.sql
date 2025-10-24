@@ -4,7 +4,7 @@ CREATE TABLE "public"."User" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'user',
     "location" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -17,6 +17,7 @@ CREATE TABLE "public"."Farm" (
     "size" DOUBLE PRECISION,
     "cropType" TEXT,
     "ownerId" TEXT NOT NULL,
+    "location" TEXT NOT NULL,
 
     CONSTRAINT "Farm_pkey" PRIMARY KEY ("id")
 );
@@ -31,6 +32,18 @@ CREATE TABLE "public"."CropCycle" (
     "farmId" TEXT NOT NULL,
 
     CONSTRAINT "CropCycle_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Crops" (
+    "id" SERIAL NOT NULL,
+    "cropName" TEXT NOT NULL,
+    "cropType" TEXT NOT NULL,
+    "region" TEXT NOT NULL,
+    "growthData" JSONB NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Crops_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -56,6 +69,9 @@ CREATE TABLE "public"."Advice" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Crops_cropName_key" ON "public"."Crops"("cropName");
 
 -- AddForeignKey
 ALTER TABLE "public"."Farm" ADD CONSTRAINT "Farm_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,8 +1,12 @@
 const { PrismaClient } = require("../generated/prisma");
+const { OAuth2Client } = require("google-auth-library");
 const prisma = new PrismaClient();
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+// initialize the google auth client
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Login function
 const login = async (req, res) => {
@@ -43,9 +47,9 @@ const login = async (req, res) => {
     const tokenPayload = {
       user_id: user.id,
       name: user.name,
-      phone: user.phone,
       email: user.email,
       role: user.role,
+      location: user.location,
     };
 
     const token = jwt.sign(tokenPayload, process.env.jwtSecret, {
@@ -131,6 +135,50 @@ const register = async (req, res) => {
     });
   }
 };
+
+// google authentication
+const googleAuth = async (req, res) => {
+  const { token: googleIdToken } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: googleIdToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { name, email } = payload;
+
+    const user = await prisma.user.upsert({
+      where: { email }, //check if user exists
+      update: {}, // do nothing if user exists
+      create: { email, name, role: "user", location: null }, //create if user dont exists
+    });
+
+    const tokenPayload = {
+      user_id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      location: user.location,
+    };
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: tokenPayload,
+    });
+  } catch (error) {
+    console.error("Google Auth Error:", error);
+    return res.status(401).json({ error: "Invalid Google token or database error." });
+  }
+};
+
 
 // Get user profile with basic info
 const getUserProfile = async (req, res) => {
@@ -325,4 +373,5 @@ module.exports = {
   getUserProfile,
   updateUserProfile,
   getAllUsers,
+  googleAuth,
 };
