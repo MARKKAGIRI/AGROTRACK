@@ -14,7 +14,7 @@ export const useGoogleAuth = (onAuthComplete) => {
     useProxy: true, // important for Expo Go
     });
 
-    console.log(redirectUri);
+    
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: ANDROID_CLIENT_ID,
