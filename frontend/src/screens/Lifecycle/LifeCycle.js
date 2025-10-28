@@ -4,8 +4,13 @@ import PlantCard from "../../components/PlantCard";
 import { plants } from "../../services/CropData";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/AuthContext";
 
 const LifeCycle = () => {
+  const {user, token} = useAuth();
+
+  console.log("user: \n", user)
+  console.log("token: \n", token)
   return (
     <SafeAreaView className="flex-1 bg-gray-100 p-3">
       <FlatList

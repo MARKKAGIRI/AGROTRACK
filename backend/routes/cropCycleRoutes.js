@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { addCrop } = require("../controllers/cropCycleController");
+const { addCrop, updateCrop } = require("../controllers/cropCycleController");
 const { tokenValidator } = require("../middleware/authMiddleware");
 
 // public route
-router.post("/addCrop", tokenValidator, addCrop);
+router.post("/:farmId/addCrop", tokenValidator, addCrop);
+
+router.put("/:farmId/updateCrop/:cropId", tokenValidator, updateCrop)
 
 module.exports = router;
