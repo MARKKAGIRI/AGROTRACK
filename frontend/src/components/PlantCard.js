@@ -27,7 +27,11 @@ const PlantCard = ({ plant }) => {
         </View>
 
         {/* Plus button */}
-        <Pressable className="bg-gray-300 p-3 rounded-xl">
+        <Pressable className="bg-gray-300 p-3 rounded-xl" onPress={
+          () => { /* Handle add action */ 
+            navigation?.navigate("CropTasks", { plantId: plant.id });
+          }
+        }>
           <Ionicons name="add" size={20} color="#4b5563" />
         </Pressable>
       </View>
