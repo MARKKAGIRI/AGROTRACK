@@ -84,6 +84,8 @@ const Home = () => {
               <Icon name="calendar-clock" size={32} color="#388e3c" />
               <Text style={styles.actionLabel}>Schedule Task</Text>
             </TouchableOpacity>
+           
+
           </View>
         </View>
       </ScrollView>

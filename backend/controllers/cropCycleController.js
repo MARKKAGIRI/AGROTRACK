@@ -101,7 +101,52 @@ const updateCrop = async (req, res) => {
   }
 };
 
+const deleteCrop = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.user_id;
+
+    const cropCycle = await prisma.cropCycle.findUnique({
+      where: { id },
+      include: { farm: true },
+    });
+
+    if (!cropCycle) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Crop cycle not found" 
+      });
+    }
+
+    if (cropCycle.farm.ownerId !== userId) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "You can only delete crops from your own farm" 
+      });
+    }
+
+    // All tasks with this cropId will be automatically deleted!
+    await prisma.cropCycle.delete({
+      where: { id },
+    });
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Crop cycle deleted successfully" 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error", 
+      error: error.message 
+    });
+  }
+};
+
+
+
 module.exports = {
   addCrop,
+  deleteCrop,
   updateCrop,
 };
