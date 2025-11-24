@@ -10,6 +10,7 @@ import Analytics from "../screens/Analytics/Analytics";
 import LifeCycle from "../screens/Lifecycle/LifeCycle";
 import Profile from "../screens/Profile/Profile";
 
+
 const Tab = createBottomTabNavigator();
 
 const MainStack = () => {

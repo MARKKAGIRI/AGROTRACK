@@ -10,7 +10,7 @@ export default function AuthStack() {
       {/* Login appears first */}
       <Stack.Screen name="Login" component={Login} />
       {/* Register appears only when user navigates */}
-      <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="Register" component={Register} />      
     </Stack.Navigator>
   );
 }

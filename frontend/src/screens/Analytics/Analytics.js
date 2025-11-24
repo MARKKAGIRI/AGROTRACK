@@ -88,8 +88,8 @@ const AnalyticsScreen = () => {
     {
       name: "Broccoli",
       icon: "🥦",
-      planted: 6,
-      growing: 4,
+      planted: 4,
+      growing: 2,
       harvested: 2,
       progress: 30,
       progressColor: "#ef4444"
@@ -97,7 +97,7 @@ const AnalyticsScreen = () => {
   ];
 
   const totalPlants = plantData.reduce((sum, plant) => sum + plant.planted, 0);
-  const readyToHarvest = plantData.filter(plant => plant.progress >= 70).length;
+  const readyToHarvest = 30;
 
   const ProgressBar = ({ progress, color = "#22c55e" }) => (
     <View style={{ width: '100%', height: 8, backgroundColor: '#e5e7eb', borderRadius: 4 }}>
@@ -188,31 +188,11 @@ const AnalyticsScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#22c55e" />
-      
-      {/* Header */}
-      <LinearGradient
-        colors={["#22c55e", "#16a34a"]}
-        style={{ paddingHorizontal: 20, paddingVertical: 24 }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>Analytics</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 24, height: 24, backgroundColor: '#ef4444', borderRadius: 12, marginRight: 12, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>1</Text>
-            </View>
-            <View style={{ width: 32, height: 32, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>JD</Text>
-            </View>
-          </View>
-        </View>
-        <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>Welcome back, John Doe</Text>
-      </LinearGradient>
 
       <ScrollView 
         style={{ flex: 1 }} 
         showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 20, paddingTop: 40 }}
       >
         {/* Plant Performance Section */}
         <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 }}>

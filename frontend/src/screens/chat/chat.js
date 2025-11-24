@@ -2,11 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -18,20 +16,13 @@ import {
   Share,
   Pressable,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /*
-  Chat screen for AgroTrack+ assistant.
-
-  Notes:
-  - Messages are stored inverted (newest at index 0) to work with FlatList inverted prop.
-  - AsyncStorage is used for simple persistence; STORAGE_KEY holds saved messages.
-  - botResponseFor() implements a tiny keyword-based response engine.
-  - TypingIndicator is a small Animated component to simulate bot thinking.
-  - MessageBubble handles display and long-press actions (copy/share).
-  - Use KeyboardAvoidingView + TouchableWithoutFeedback to provide good keyboard UX.
+  Chat screen for AgroTrack+ assistant - now using NativeWind for styling.
 */
 
 const COLORS = {
@@ -57,7 +48,7 @@ const QUICK_TOPICS = [
 const nowTime = (d = new Date()) =>
   d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-// Simple keyword-based bot — keep concise, extendable for future LLM integration
+// Simple keyword-based bot
 const botResponseFor = (text) => {
   const t = text.toLowerCase();
   if (t.includes('pest') || t.includes('insect') || t.includes('aphid')) {
@@ -81,10 +72,7 @@ const botResponseFor = (text) => {
   return "Here's a tip: Keep records of tasks and observations. If you give me more details (crop, problem, location), I can provide tailored advice.";
 };
 
-/* TypingIndicator
-   - Animated three-dot indicator used while bot "types".
-   - Keeps animation lightweight by looping a simple sequence.
-*/
+/* TypingIndicator - Animated three-dot indicator */
 function TypingIndicator() {
   const anim = useRef(new Animated.Value(0)).current;
 
@@ -99,7 +87,7 @@ function TypingIndicator() {
     return () => loop.stop();
   }, [anim]);
 
-  const dotStyle = (delay) => ({
+  const dotStyle = {
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -117,48 +105,47 @@ function TypingIndicator() {
         }),
       },
     ],
-  });
+  };
 
   return (
-    <View style={styles.typingWrap} accessibilityLabel="Bot typing indicator">
-      <View style={styles.typingBubble}>
-        <Animated.View style={dotStyle(0)} />
-        <Animated.View style={dotStyle(150)} />
-        <Animated.View style={dotStyle(300)} />
+    <View className="py-1.5 items-start" accessibilityLabel="Bot typing indicator">
+      <View className="flex-row bg-white p-2 rounded-xl shadow-sm ml-12 items-end">
+        <Animated.View style={dotStyle} />
+        <Animated.View style={dotStyle} />
+        <Animated.View style={dotStyle} />
       </View>
     </View>
   );
 }
 
-/* MessageBubble
-   - Renders a single message for bot or user.
-   - onLongPress triggers actions (copy/share).
-   - Uses simple avatars and time stamp.
-*/
+/* MessageBubble - Renders a single message */
 function MessageBubble({ item, onLongPress }) {
   const isUser = item.sender === 'user';
   return (
     <Pressable
       onLongPress={() => onLongPress && onLongPress(item)}
       accessibilityLabel={isUser ? 'Your message' : 'Assistant message'}
-      style={[
-        styles.messageRow,
-        isUser ? styles.messageRowUser : styles.messageRowBot,
-      ]}
+      className={`flex-row items-end my-1.5 ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       {!isUser && (
-        <View style={styles.avatarBot}>
+        <View className="w-[34px] h-[34px] rounded-lg bg-[#16a34a] items-center justify-center mr-2">
           <MaterialCommunityIcons name="leaf" size={18} color={COLORS.white} />
         </View>
       )}
-      <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot]}>
-        <Text style={[styles.messageText, isUser ? styles.messageTextUser : styles.messageTextBot]}>
+      <View 
+        className={`max-w-[80%] p-3 rounded-xl shadow-sm ${
+          isUser 
+            ? 'bg-[#16a34a] rounded-tr-sm rounded-tl-xl rounded-bl-xl' 
+            : 'bg-white rounded-tl-sm rounded-tr-xl rounded-br-xl'
+        }`}
+      >
+        <Text className={`text-sm leading-[18px] ${isUser ? 'text-white' : 'text-[#111]'}`}>
           {item.text}
         </Text>
-        <Text style={styles.timeText}>{item.time}</Text>
+        <Text className="text-[11px] text-gray-400 mt-1.5 self-end">{item.time}</Text>
       </View>
       {isUser && (
-        <View style={styles.avatarUser}>
+        <View className="w-[34px] h-[34px] rounded-full bg-gray-600 items-center justify-center ml-2">
           <Feather name="user" size={18} color="#fff" />
         </View>
       )}
@@ -166,12 +153,7 @@ function MessageBubble({ item, onLongPress }) {
   );
 }
 
-/* ChatScreen main component
-   - Loads persisted messages on mount.
-   - sendMessage handles adding user msg, simulating bot typing, and appending bot reply.
-   - Messages are stored inverted (newest first) to work with inverted FlatList.
-   - Provides quick topics, clear/export, copy/share features.
-*/
+/* ChatScreen main component */
 export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -204,13 +186,10 @@ export default function ChatScreen() {
 
   // persist messages whenever they change and auto-scroll to latest
   useEffect(() => {
-    // persist messages
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch((e) =>
       console.warn('Save chat failed', e)
     );
-    // auto-scroll
     if (listRef.current && messages.length) {
-      // small timeout to allow layout to settle before scrolling
       setTimeout(() => listRef.current.scrollToOffset({ offset: 0, animated: true }), 200);
     }
   }, [messages]);
@@ -227,10 +206,8 @@ export default function ChatScreen() {
       };
       setMessages((m) => [userMsg, ...m]);
       setInput('');
-      // simulate bot typing
       setIsTyping(true);
 
-      // simulate network/processing delay before bot reply
       setTimeout(() => {
         const botText = botResponseFor(text);
         const botMsg = {
@@ -247,7 +224,6 @@ export default function ChatScreen() {
   );
 
   const onQuickTopic = (topic) => {
-    // populate input for quick editing or immediate send
     setInput(topic);
   };
 
@@ -265,7 +241,6 @@ export default function ChatScreen() {
     ]);
   };
 
-  // long-press actions menu
   const handleLongPressMessage = async (item) => {
     Alert.alert('Message actions', '', [
       { text: 'Copy', onPress: () => copyToClipboard(item.text) },
@@ -274,12 +249,8 @@ export default function ChatScreen() {
     ]);
   };
 
-  // copy helper: tries Clipboard API, falls back to Share
   const copyToClipboard = (text) => {
-    // Use native Share fallback if Clipboard not available
-    // Attempt to use Clipboard API
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const Clipboard = require('react-native').Clipboard || require('expo-clipboard');
       if (Clipboard && Clipboard.setString) {
         Clipboard.setString(text);
@@ -300,7 +271,6 @@ export default function ChatScreen() {
     }
   };
 
-  // export conversation text and share
   const exportConversation = async () => {
     const text = messages
       .slice()
@@ -317,29 +287,29 @@ export default function ChatScreen() {
   const renderItem = ({ item }) => <MessageBubble item={item} onLongPress={handleLongPressMessage} />;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView className="flex-1 bg-[#f0fdf4]">
       {/* Header with gradient */}
       <LinearGradient
         colors={[COLORS.primary, COLORS.dark]}
         start={[0, 0]}
         end={[1, 1]}
-        style={styles.header}
+        className={`${Platform.OS === 'android' ? 'pt-5' : 'pt-2'} pb-3 px-3.5`}
       >
-        <View style={styles.headerInner}>
-          <View style={styles.headerLeft}>
-            <View style={styles.headerIcon}>
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center">
+            <View className="w-11 h-11 rounded-xl bg-white items-center justify-center">
               <MaterialCommunityIcons name="leaf" size={22} color={COLORS.primary} />
             </View>
-            <View style={{ marginLeft: 10 }}>
-              <Text style={styles.headerTitle}>AgroTrack+ AI Assistant</Text>
-              <Text style={styles.headerSubtitle}>Your smart farming companion</Text>
+            <View className="ml-2.5">
+              <Text className="text-white font-bold text-base">AgroTrack+ AI Assistant</Text>
+              <Text className="text-[#d1f7dc] text-xs mt-0.5">Your smart farming companion</Text>
             </View>
           </View>
-          <View style={styles.headerRight}>
-            <TouchableOpacity onPress={clearConversation} accessibilityLabel="Clear conversation" style={styles.iconBtn}>
+          <View className="flex-row items-center">
+            <TouchableOpacity onPress={clearConversation} accessibilityLabel="Clear conversation" className="ml-3 p-1.5">
               <Feather name="trash-2" size={18} color={COLORS.white} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={exportConversation} accessibilityLabel="Share conversation" style={styles.iconBtn}>
+            <TouchableOpacity onPress={exportConversation} accessibilityLabel="Share conversation" className="ml-3 p-1.5">
               <Feather name="share-2" size={18} color={COLORS.white} />
             </TouchableOpacity>
           </View>
@@ -347,27 +317,27 @@ export default function ChatScreen() {
       </LinearGradient>
 
       {/* Main area with keyboard handling */}
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.container}>
+          <View className="flex-1 px-3 pt-3">
             {/* Quick topics */}
-            <View style={styles.topicsWrap}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.topicsScroll}>
+            <View className="h-[52px] mb-2">
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center pr-2">
                 {QUICK_TOPICS.map((t) => (
                   <TouchableOpacity
                     key={t}
-                    style={styles.topicPill}
+                    className="bg-white px-3 py-2 rounded-full mr-2 border border-[#e6f6ea] shadow-sm"
                     onPress={() => onQuickTopic(t)}
                     accessibilityLabel={`Quick topic ${t}`}
                   >
-                    <Text style={styles.topicText}>{t}</Text>
+                    <Text className="text-[#16a34a] font-semibold text-[13px]">{t}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             </View>
 
             {/* Messages */}
-            <View style={styles.messagesWrap}>
+            <View className="flex-1 mb-2">
               <FlatList
                 ref={listRef}
                 data={messages}
@@ -382,9 +352,9 @@ export default function ChatScreen() {
             </View>
 
             {/* Input */}
-            <View style={styles.inputArea}>
+            <View className="flex-row items-end py-2 px-1.5 bg-[#f0fdf4] border-t border-[#e6f6ea]">
               <TextInput
-                style={styles.input}
+                className={`flex-1 min-h-[44px] max-h-[120px] bg-white rounded-xl px-3 ${Platform.OS === 'ios' ? 'py-2.5' : 'py-2'} text-[15px] mr-2 border border-[#eef7ee]`}
                 value={input}
                 onChangeText={setInput}
                 placeholder="Ask about pests, soil, watering..."
@@ -396,7 +366,7 @@ export default function ChatScreen() {
                 }}
               />
               <TouchableOpacity
-                style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
+                className={`bg-[#16a34a] w-12 h-12 rounded-xl items-center justify-center ${!input.trim() && 'opacity-50'}`}
                 onPress={() => {
                   if (input.trim()) sendMessage(input);
                 }}
@@ -412,144 +382,3 @@ export default function ChatScreen() {
     </SafeAreaView>
   );
 }
-
-// Styling kept modular and responsive-friendly (shadows differ per platform)
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: COLORS.lightBg },
-  flex: { flex: 1 },
-  header: {
-    paddingTop: Platform.OS === 'android' ? 22 : 10,
-    paddingBottom: 12,
-    paddingHorizontal: 14,
-  },
-  headerInner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  headerIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: COLORS.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: { color: COLORS.white, fontWeight: '700', fontSize: 16 },
-  headerSubtitle: { color: '#d1f7dc', fontSize: 12, marginTop: 2 },
-  headerRight: { flexDirection: 'row', alignItems: 'center' },
-  iconBtn: { marginLeft: 12, padding: 6 },
-
-  container: { flex: 1, paddingHorizontal: 12, paddingTop: 12 },
-  topicsWrap: { height: 52, marginBottom: 8 },
-  topicsScroll: { alignItems: 'center', paddingRight: 8 },
-  topicPill: {
-    backgroundColor: COLORS.white,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#e6f6ea',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  topicText: { color: COLORS.primary, fontWeight: '600', fontSize: 13 },
-
-  messagesWrap: { flex: 1, marginBottom: 8 },
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', marginVertical: 6 },
-  messageRowUser: { justifyContent: 'flex-end' },
-  messageRowBot: { justifyContent: 'flex-start' },
-  avatarBot: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  avatarUser: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#4b5563',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
-  },
-  bubble: {
-    maxWidth: '80%',
-    padding: 12,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  bubbleBot: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 10,
-    borderBottomRightRadius: 10,
-  },
-  bubbleUser: {
-    backgroundColor: COLORS.primary,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 4,
-    borderBottomLeftRadius: 10,
-  },
-  messageText: { fontSize: 14, lineHeight: 18 },
-  messageTextBot: { color: '#111' },
-  messageTextUser: { color: '#fff' },
-  timeText: { fontSize: 11, color: '#9ca3af', marginTop: 6, alignSelf: 'flex-end' },
-
-  typingWrap: { paddingVertical: 6, alignItems: 'flex-start' },
-  typingBubble: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.white,
-    padding: 8,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-    marginLeft: 48,
-    alignItems: 'flex-end',
-  },
-
-  inputArea: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    backgroundColor: COLORS.lightBg,
-    borderTopWidth: 1,
-    borderTopColor: '#e6f6ea',
-  },
-  input: {
-    flex: 1,
-    minHeight: 44,
-    maxHeight: 120,
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: Platform.OS === 'ios' ? 10 : 8,
-    fontSize: 15,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#eef7ee',
-  },
-  sendBtn: {
-    backgroundColor: COLORS.primary,
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendBtnDisabled: { opacity: 0.5 },
-});

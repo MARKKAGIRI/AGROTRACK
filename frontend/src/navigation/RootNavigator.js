@@ -1,7 +1,7 @@
 import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { NavigationContainer } from "@react-navigation/native";
-import MainStack from "./MainStack";
+import MainAppStack from "./MainAppStack";
 import AuthStack from "./AuthStack";
 
 const RootNavigator = () => {
@@ -16,7 +16,7 @@ const RootNavigator = () => {
   }
   return (
     <NavigationContainer>
-      {user ? <MainStack /> : <AuthStack />}
+      {user ? <MainAppStack /> : <AuthStack />}
     </NavigationContainer>
   );
 };

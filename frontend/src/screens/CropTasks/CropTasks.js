@@ -68,16 +68,6 @@ export default function CropTasks({ navigation }) {
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            onPress={() => (navigation && navigation.goBack ? navigation.goBack() : null)}
-            accessibilityLabel="Back"
-          >
-            <Feather name="chevron-left" size={24} color={COLORS.grayText} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Tasks</Text>
-          <View style={{ width: 24 }} />
-        </View>
 
         {/* Plant info card */}
         <View style={styles.plantCard} accessibilityLabel="Plant info">
