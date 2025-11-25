@@ -8,7 +8,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export const useGoogleAuth = (onAuthComplete) => {
   const [isLoading, setIsLoading] = useState(false);
-
+  
   
   const redirectUri = AuthSession.makeRedirectUri({
     useProxy: true, // important for Expo Go
