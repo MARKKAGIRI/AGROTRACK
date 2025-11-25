@@ -2,66 +2,128 @@ const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 const { validationResult } = require("express-validator");
 
-// Controller to add a new farm
-const addFarm = async (req, res) => {
-  // Validate request body
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
+// Controller to get all farms for the logged-in user
+const getAllFarms = async (req, res) => {
   try {
-    const { name, size, ownerId, location } = req.body;
     const userId = req.user.user_id;
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (userId !== ownerId) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "You can only add farms for yourself",
-        });
-    }
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
 
-    const farm = await prisma.farm.create({
-      data: {
-        name,
-        size,
-        location,
-        ownerId: userId,
-      },
+    const farms = await prisma.farm.findMany({
+      where: { ownerId: userId },
+      orderBy: { createdAt: "desc" },
     });
 
-    //await farm.save();
-
-    res.status(201).json({ message: "Farm added successfully", farm });
+    return res.status(200).json({
+      success: true,
+      message: "Farms retrieved successfully",
+      farms,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Get farms error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
-
-const updateFarm = async (req, res) => {
+// Controller to get a single farm by ID
+const getSingleFarm = async (req, res) => {
   try {
     const { farmId } = req.params;
-    const { name, location, size } = req.body;
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array() });
-    }
-
     const userId = req.user.user_id;
 
     const farm = await prisma.farm.findUnique({
       where: { id: farmId },
     });
 
+    if (!farm) {
+      return res.status(404).json({
+        success: false,
+        message: "Farm not found",
+      });
+    }
+
+    if (farm.ownerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this farm",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Farm retrieved successfully",
+      farm,
+    });
+  } catch (error) {
+    console.error("Get farm error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+// Controller to add a new farm
+const addFarm = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const userId = req.user.user_id;
+    const ownerId = req.body.ownerId;
+    const { name, location, size, unit, type, crops, notes } = req.body;
+
+    if (ownerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only add farms for yourself",
+      });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const farm = await prisma.farm.create({
+      data: {
+        name,
+        location,
+        size,
+        unit,
+        type,
+        crops: crops || [],
+        notes,
+        ownerId: userId,
+      },
+    });
+
+    return res.status(201).json({ success: true, message: "Farm added successfully", farm });
+  } catch (error) {
+    console.error("Add farm error:", error);
+    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Controller to update an existing farm
+const updateFarm = async (req, res) => {
+  try {
+    const { farmId } = req.params;
+    const { name, location, size, unit, type, crops, notes } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const userId = req.user.user_id;
+
+    const farm = await prisma.farm.findUnique({ where: { id: farmId } });
     if (!farm) {
       return res.status(404).json({ success: false, message: "Farm not found" });
     }
@@ -76,6 +138,10 @@ const updateFarm = async (req, res) => {
         name: name || farm.name,
         location: location || farm.location,
         size: size || farm.size,
+        unit: unit || farm.unit,
+        type: type || farm.type,
+        crops: crops || farm.crops,
+        notes: notes || farm.notes,
       },
     });
 
@@ -90,45 +156,31 @@ const updateFarm = async (req, res) => {
   }
 };
 
+// Controller to delete a farm
 const deleteFarm = async (req, res) => {
   try {
     const { farmId } = req.params;
     const userId = req.user.user_id;
 
-    // Find the farm
-    const farm = await prisma.farm.findUnique({
-      where: { id: farmId },
-    });
-
+    const farm = await prisma.farm.findUnique({ where: { id: farmId } });
     if (!farm) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Farm not found" });
+      return res.status(404).json({ success: false, message: "Farm not found" });
     }
 
-    // Check ownership
     if (farm.ownerId !== userId) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "You are not authorized to delete this farm",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this farm",
+      });
     }
 
-    // Delete the farm
-    await prisma.farm.delete({
-      where: { id: farmId },
-    });
+    await prisma.farm.delete({ where: { id: farmId } });
 
-    res
-      .status(200)
-      .json({ success: true, message: "Farm deleted successfully" });
+    return res.status(200).json({ success: true, message: "Farm deleted successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+    console.error("Delete farm error:", error);
+    return res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-module.exports = { deleteFarm, addFarm, updateFarm };
+module.exports = { deleteFarm, addFarm, updateFarm, getAllFarms, getSingleFarm };

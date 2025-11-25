@@ -6,8 +6,9 @@ import EditCropScreen from "../screens/Lifecycle/EditCropScreen";
 import AddCropScreen from "../screens/Lifecycle/AddCropScreen";
 import CropTasks from "../screens/CropTasks/CropTasks";
 import ChatScreen from "../screens/chat/chat";
-import UpdateProfileScreen from "../screens/profile/UpdateProfileScreen";
+import UpdateProfileScreen from "../screens/Profile/UpdateProfileScreen";
 import SettingsScreen from "../screens/settings/SettingsScreen";
+import AddFarm from "../screens/Home/AddFarm";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,13 +30,12 @@ export default function MainAppStack() {
           headerTintColor: "#2e7d32",
         }}
       />
+
       <Stack.Screen
       name="AllFarms"
       component={AllFarmsScreen}
       options={{
-        title: "AllFarmsScreen",
-        headerBackTitleVisible: false,
-        headerTintColor: "#2e7d32",
+        headerShown: false,
         }}
     />
 
@@ -88,6 +88,14 @@ export default function MainAppStack() {
       <Stack.Screen
         name="Settings"
         component={SettingsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+       <Stack.Screen
+        name="AddFarm"
+        component={AddFarm}
         options={{
           headerShown: false,
         }}

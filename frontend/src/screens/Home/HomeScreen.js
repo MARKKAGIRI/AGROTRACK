@@ -13,7 +13,6 @@ import { useAuth } from "../../context/AuthContext";
 const Home = () => {
   const navigation = useNavigation();
   const { user, token } = useAuth();
-  console.log(token);
 
   return (
     <SafeAreaView className="flex-1 bg-[#F6FAF7]">
@@ -110,10 +109,12 @@ const Home = () => {
         {/* Quick Actions */}
         <View className="w-full mt-2 mb-6">
           <View className="flex-row justify-between mb-4">
-            <TouchableOpacity className="bg-white items-center justify-center py-4 px-4 rounded-2xl w-[48%] shadow-md">
-              <Icon name="plus-circle" size={32} color="#388e3c" />
+            <TouchableOpacity className="bg-white items-center justify-center py-4 px-4 rounded-2xl w-[48%] shadow-md"
+            onPress={() => navigation.navigate("AllFarms")}>
+              <Icon name="tractor" size={32} color="#388e3c" />
+
               <Text className="mt-2 text-[15px] font-semibold text-[#388e3c] text-center">
-                Add Crop
+                My Farms
               </Text>
             </TouchableOpacity>
             <TouchableOpacity

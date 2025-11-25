@@ -16,6 +16,8 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { API_URL } from "@env";
 import { useAuth } from "../../context/AuthContext";
+import { addFarm as addFarmApi } from "../../services/farmApi";
+
 
 const suggestedCrops = [
 	"Tomatoes",
@@ -34,7 +36,7 @@ const farmTypes = [
 ];
 
 const AddFarm = ({ navigation }) => {
-	const { token } = useAuth();
+	const { token, user } = useAuth();
 
 	const [photo, setPhoto] = useState(null);
 	const [name, setName] = useState("");
@@ -66,8 +68,8 @@ const AddFarm = ({ navigation }) => {
 				quality: 0.7,
 			});
 
-			if (!result.cancelled) {
-				setPhoto(result.uri);
+			if (!result.canceled) {
+				setPhoto(result.assets[0].uri);
 			}
 		} catch (err) {
 			console.error(err);
@@ -80,8 +82,15 @@ const AddFarm = ({ navigation }) => {
 			Alert.alert("Permission required", "Camera permission is required to take a photo.");
 			return;
 		}
-		const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, quality: 0.7 });
-		if (!result.cancelled) setPhoto(result.uri);
+
+		const result = await ImagePicker.launchCameraAsync({
+			allowsEditing: false,
+			quality: 0.7,
+		});
+
+		if (!result.canceled) {
+			setPhoto(result.assets[0].uri);
+		}
 	};
 
 	const useCurrentLocation = async () => {
@@ -131,53 +140,43 @@ const AddFarm = ({ navigation }) => {
 	};
 
 	const submit = async () => {
-		if (!validate()) return;
-		setLoading(true);
-		try {
-			const payload = {
-				name: name.trim(),
-				location: locationText.trim(),
-				size: Number(size),
-				unit,
-				type,
-				crops,
-				notes,
-				photo, // uri - backend may handle or ignore
-			};
+	if (!validate()) return;
+	setLoading(true);
+	try {
+		const payload = {
+			name: name.trim(),
+			location: locationText.trim(),
+			size: Number(size),
+			unit,
+			type,
+			crops,
+			notes,
+			photo, // you may handle uploading separately
+		};
 
-			const res = await fetch(`${API_URL}/api/farms/addFarm`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: token ? `Bearer ${token}` : "",
-				},
-				body: JSON.stringify(payload),
-			});
+		const data = await addFarmApi(payload, user.user_id, token); // <-- use API service
 
-			const data = await res.json();
-			if (res.ok) {
-				Alert.alert("Success", "Farm added successfully");
-				// reset
-				setName("");
-				setLocationText("");
-				setSize("");
-				setUnit("Acres");
-				setType("");
-				setCrops([]);
-				setNotes("");
-				setPhoto(null);
-				navigation?.goBack();
-			} else {
-				console.error(data);
-				Alert.alert("Error", data?.message || "Failed to add farm");
-			}
-		} catch (err) {
-			console.error(err);
-			Alert.alert("Error", "Unable to reach server");
-		} finally {
-			setLoading(false);
-		}
-	};
+		Alert.alert("Success", "Farm added successfully");
+
+		// Reset form
+		setName("");
+		setLocationText("");
+		setSize("");
+		setUnit("Acres");
+		setType("");
+		setCrops([]);
+		setNotes("");
+		setPhoto(null);
+		navigation?.goBack();
+
+	} catch (err) {
+		console.error(err);
+		Alert.alert("Error", err?.message || "Failed to add farm");
+	} finally {
+		setLoading(false);
+	}
+};
+
 
 	return (
 		<SafeAreaView className="flex-1 bg-[#F5F5F0]">
@@ -369,4 +368,3 @@ const AddFarm = ({ navigation }) => {
 };
 
 export default AddFarm;
-
