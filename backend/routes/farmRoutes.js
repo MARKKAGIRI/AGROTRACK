@@ -1,10 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { addFarm, deleteFarm, updateFarm } = require("../controllers/farmsController");
+const { addFarm, deleteFarm, updateFarm, getAllFarms, getSingleFarm } = require("../controllers/farmsController");
 const { tokenValidator } = require("../middleware/authMiddleware");
 
+
 // public route
-router.post("/addFarm", tokenValidator, addFarm);
+router.get("/getAllFarms/:userId", tokenValidator, getAllFarms )
+
+router.get("/getSingleFarm/:farmId", tokenValidator, getSingleFarm );
+
+router.post("/addFarm/:ownerId", tokenValidator, addFarm);
 
 router.put("/updateFarm/:farmId", tokenValidator, updateFarm)
 
