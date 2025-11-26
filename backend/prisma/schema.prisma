@@ -20,19 +20,22 @@ model User {
 }
 
 model Farm {
-  id       String       @id @default(uuid())
-  name     String
-  size     Float?
-  unit     String?       // Acres or Hectares
-  type     String?       // Crop Farm, Livestock, Mixed, etc.
-  location String
-  crops    Json?         // Array of crop names
-  notes    String?       // Optional notes
-  ownerId  String
-  cropType String?       // optional
-  cropCycles CropCycle[] @relation("FarmCrops") // corrected relation
-  owner    User         @relation(fields: [ownerId], references: [id])
+  id        String       @id @default(uuid())
+  name      String
+  size      Float?
+  unit      String?
+  type      String?        // Crop Farm, Livestock, Mixed, etc.
+  location  String
+  crops     Json?          // Array of crop names (legacy)
+  notes     String?
+  ownerId   String
+  cropType  String?
+  
+  cropCycles CropCycle[] @relation("FarmCrops")
+  owner      User         @relation(fields: [ownerId], references: [id])
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CropCycle {
@@ -42,18 +45,9 @@ model CropCycle {
   harvestDate  DateTime?
   status       String
   farmId       String
-  farm         Farm      @relation("FarmCrops", fields: [farmId], references: [id]) // relation name matches Farm
+
+  farm         Farm      @relation("FarmCrops", fields: [farmId], references: [id])
   tasks        Task[]
-}
-
-
-model Crops {
-  id         Int      @id @default(autoincrement())
-  cropName   String   @unique
-  cropType   String
-  region     String
-  growthData Json
-  createdAt  DateTime @default(now())
 }
 
 model Task {
@@ -71,4 +65,13 @@ model Advice {
   createdAt DateTime @default(now())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model Crops {
+  id         Int      @id @default(autoincrement())
+  cropName   String   @unique
+  cropType   String
+  region     String
+  growthData Json
+  createdAt  DateTime @default(now())
 }

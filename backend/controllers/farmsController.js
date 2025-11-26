@@ -7,15 +7,46 @@ const getAllFarms = async (req, res) => {
   try {
     const userId = req.user.user_id;
 
+    // Fetch all farms for this user
     const farms = await prisma.farm.findMany({
       where: { ownerId: userId },
-      orderBy: { createdAt: "desc" },
+      include: {
+        cropCycles: true, // Include crop cycles for analytics
+      },
+    });
+
+    // Map farms to include analytics
+    const formattedFarms = farms.map(farm => {
+      const totalCrops = farm.cropCycles.length || 0;
+      const totalHarvested = farm.cropCycles.filter(c => c.harvestDate).length || 0;
+      const upcomingHarvest = farm.cropCycles
+        .filter(c => c.harvestDate && new Date(c.harvestDate) > new Date())
+        .length || 0;
+
+      return {
+        id: farm.id,
+        name: farm.name,
+        size: farm.size,
+        unit: farm.unit,
+        type: farm.type,
+        location: farm.location,
+        crops: farm.crops || [], // legacy
+        notes: farm.notes,
+        cropType: farm.cropType,
+        createdAt: farm.createdAt,
+        updatedAt: farm.updatedAt,
+        analytics: {
+          totalCrops,
+          totalHarvested,
+          upcomingHarvest,
+        }
+      };
     });
 
     return res.status(200).json({
       success: true,
       message: "Farms retrieved successfully",
-      farms,
+      farms: formattedFarms,
     });
   } catch (error) {
     console.error("Get farms error:", error);
@@ -26,6 +57,7 @@ const getAllFarms = async (req, res) => {
     });
   }
 };
+
 
 // Controller to get a single farm by ID
 const getSingleFarm = async (req, res) => {
@@ -74,22 +106,19 @@ const addFarm = async (req, res) => {
   }
 
   try {
-    const userId = req.user.user_id;
-    const ownerId = req.body.ownerId;
+    const userId = req.user.user_id; // taken from authenticated token
     const { name, location, size, unit, type, crops, notes } = req.body;
 
-    if (ownerId !== userId) {
-      return res.status(403).json({
+    // Verify user exists
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: "You can only add farms for yourself",
+        message: "User not found",
       });
     }
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-
+    // Create farm
     const farm = await prisma.farm.create({
       data: {
         name,
@@ -99,16 +128,26 @@ const addFarm = async (req, res) => {
         type,
         crops: crops || [],
         notes,
-        ownerId: userId,
+        ownerId: userId, // Always the logged-in user
       },
     });
 
-    return res.status(201).json({ success: true, message: "Farm added successfully", farm });
+    return res.status(201).json({
+      success: true,
+      message: "Farm created successfully",
+      farm,
+    });
+
   } catch (error) {
     console.error("Add farm error:", error);
-    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
+
 
 // Controller to update an existing farm
 const updateFarm = async (req, res) => {

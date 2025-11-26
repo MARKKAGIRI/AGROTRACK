@@ -9,7 +9,7 @@ router.get("/getAllFarms/:userId", tokenValidator, getAllFarms )
 
 router.get("/getSingleFarm/:farmId", tokenValidator, getSingleFarm );
 
-router.post("/addFarm/:ownerId", tokenValidator, addFarm);
+router.post("/addFarm", tokenValidator, addFarm);
 
 router.put("/updateFarm/:farmId", tokenValidator, updateFarm)
 
