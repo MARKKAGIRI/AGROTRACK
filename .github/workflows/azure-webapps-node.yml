@@ -30,9 +30,15 @@ jobs:
         cd backend
         npm install
 
+    - name: Generate Prisma Client
+      run: |
+        cd backend
+        npx prisma generate
+
     - name: Set environment variables for tests
       run: |
         echo "DATABASE_URL=${{ secrets.DATABASE_URL_TEST }}" >> $GITHUB_ENV
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
 
     - name: Run tests
       run: |
@@ -65,4 +71,4 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ./ # deploy backend folder
+        package: ./
