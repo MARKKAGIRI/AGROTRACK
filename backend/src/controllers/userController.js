@@ -52,7 +52,7 @@ const login = async (req, res) => {
       location: user.location,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.jwtSecret, {
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
@@ -118,7 +118,7 @@ const register = async (req, res) => {
       location: newUser.location,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.jwtSecret, {
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
