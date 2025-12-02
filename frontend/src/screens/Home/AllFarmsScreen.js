@@ -20,7 +20,7 @@ export default function AllFarmsScreen() {
   const [farms, setFarms] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
-  const { user, token } = useAuth()
+  const { user, token } = useAuth();
 
   // Fetch farms on load
   useEffect(() => {
@@ -28,8 +28,8 @@ export default function AllFarmsScreen() {
       try {
         const res = await getAllFarms(user.user_id, token);
         setFarms(res.farms || []);
-      } catch (error) {w
-        console.log("Failed to load fa rms:", error);
+      } catch (error) {
+        console.log("Failed to load farms:", error);
       } finally {
         setLoading(false);
       }
@@ -44,57 +44,77 @@ export default function AllFarmsScreen() {
   );
 
   // Farm card UI
-  const renderFarmCard = ({ item }) => (
-    <TouchableOpacity className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-      <View className="flex-row items-start mb-4">
-        <View className="w-12 h-12 rounded-xl bg-green-50 items-center justify-center mr-3">
-          <Ionicons name="leaf" size={24} color="#16a34a" />
-        </View>
+  const renderFarmCard = ({ item }) => {
+    const analytics = item.analytics || { totalCrops: 0, totalHarvested: 0, upcomingHarvest: 0 };
 
-        <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-800 mb-1">
-            {item.name}
-          </Text>
+    return (
+      <TouchableOpacity className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+        {/* Header */}
+        <View className="flex-row items-start mb-4">
+          <View className="w-12 h-12 rounded-xl bg-green-50 items-center justify-center mr-3">
+            <Ionicons name="leaf" size={24} color="#16a34a" />
+          </View>
 
-          <View className="flex-row items-center">
-            <Ionicons name="location-outline" size={14} color="#6b7280" />
-            <Text className="text-sm text-gray-500 ml-1">{item.location}</Text>
+          <View className="flex-1">
+            <Text className="text-lg font-semibold text-gray-800 mb-1">
+              {item.name}
+            </Text>
+
+            <View className="flex-row items-center">
+              <Ionicons name="location-outline" size={14} color="#6b7280" />
+              <Text className="text-sm text-gray-500 ml-1">{item.location}</Text>
+            </View>
           </View>
         </View>
 
-        <View
-          className={`px-3 py-1 rounded-lg ${
-            item.status === "Active" ? "bg-green-100" : "bg-red-100"
-          }`}
+        {/* Analytics */}
+        <View className="flex-row bg-gray-50 rounded-xl p-3 mb-3">
+          <View className="flex-1 items-center">
+            <Ionicons name="grid-outline" size={18} color="#16a34a" />
+            <Text className="text-xs text-gray-500 mt-1 mb-0.5">Size</Text>
+            <Text className="text-base font-semibold text-gray-800">
+              {item.size || "N/A"} {item.unit || ""}
+            </Text>
+          </View>
+
+          <View className="flex-1 items-center">
+            <Ionicons name="leaf-outline" size={18} color="#16a34a" />
+            <Text className="text-xs text-gray-500 mt-1 mb-0.5">Crops</Text>
+            <Text className="text-base font-semibold text-gray-800">
+              {analytics.totalCrops}
+            </Text>
+          </View>
+
+          <View className="flex-1 items-center">
+            <Ionicons name="checkmark-done-outline" size={18} color="#16a34a" />
+            <Text className="text-xs text-gray-500 mt-1 mb-0.5">Harvested</Text>
+            <Text className="text-base font-semibold text-gray-800">
+              {analytics.totalHarvested}
+            </Text>
+          </View>
+
+          <View className="flex-1 items-center">
+            <Ionicons name="time-outline" size={18} color="#16a34a" />
+            <Text className="text-xs text-gray-500 mt-1 mb-0.5">Upcoming</Text>
+            <Text className="text-base font-semibold text-gray-800">
+              {analytics.upcomingHarvest}
+            </Text>
+          </View>
+        </View>
+
+        {/* View details button */}
+        <TouchableOpacity
+          className="flex-row items-center justify-center py-2.5"
+          onPress={() => navigation.navigate("FarmDetails", { farmId: item.id })}
         >
-          <Text
-            className={`text-xs font-semibold ${
-              item.status === "Active" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {item.status || "Active"}
+          <Text className="text-sm font-semibold text-green-600 mr-1">
+            View Details
           </Text>
-        </View>
-      </View>
-
-      <View className="flex-row bg-gray-50 rounded-xl p-3 mb-3">
-        <View className="flex-1 items-center">
-          <Ionicons name="grid-outline" size={18} color="#16a34a" />
-          <Text className="text-xs text-gray-500 mt-1 mb-0.5">Size</Text>
-          <Text className="text-base font-semibold text-gray-800">
-            {item.size || "N/A"}
-          </Text>
-        </View>
-      </View>
-
-      <TouchableOpacity className="flex-row items-center justify-center py-2.5">
-        <Text className="text-sm font-semibold text-green-600 mr-1">
-          View Details
-        </Text>
-        <Ionicons name="chevron-forward" size={16} color="#16a34a" />
+          <Ionicons name="chevron-forward" size={16} color="#16a34a" />
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-green-50">
@@ -108,8 +128,10 @@ export default function AllFarmsScreen() {
             {farms.length} farms total
           </Text>
         </View>
-        <TouchableOpacity className="w-12 h-12 rounded-full bg-white/20 items-center justify-center"
-        onPress={() => navigation.navigate("AddFarm")}>
+        <TouchableOpacity
+          className="w-12 h-12 rounded-full bg-white/20 items-center justify-center"
+          onPress={() => navigation.navigate("AddFarm")}
+        >
           <Ionicons name="add" size={24} color="#ffffff" />
         </TouchableOpacity>
       </View>
@@ -131,13 +153,10 @@ export default function AllFarmsScreen() {
         )}
       </View>
 
-      {/* Loading */}
+      {/* Loading / Empty states / Farm list */}
       {loading ? (
         <ActivityIndicator size="large" color="#16a34a" className="mt-10" />
       ) : farms.length === 0 ? (
-        // *****************************
-        // EMPTY STATE → No farms at all
-        // *****************************
         <View className="flex-1 items-center justify-center mt-10 px-6">
           <Ionicons name="leaf-outline" size={70} color="#16a34a" />
           <Text className="text-2xl font-bold text-gray-800 mt-4">
@@ -148,10 +167,6 @@ export default function AllFarmsScreen() {
           </Text>
         </View>
       ) : filteredFarms.length === 0 ? (
-        // *****************************************
-        // EMPTY STATE → User typed search query but
-        // no matching farms found
-        // *****************************************
         <View className="flex-1 items-center justify-center mt-10 px-6">
           <Ionicons name="search-outline" size={60} color="#6b7280" />
           <Text className="text-xl font-semibold text-gray-800 mt-3">

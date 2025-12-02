@@ -64,7 +64,7 @@ const MainStack = () => {
           }}
         />
 
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Lifecycle"
           component={LifeCycle}
           options={{
@@ -72,7 +72,7 @@ const MainStack = () => {
               <TouchableOpacity {...props} activeOpacity={0.8} />
             ),
           }}
-        />
+        /> */}
 
         <Tab.Screen
           name="Profile"

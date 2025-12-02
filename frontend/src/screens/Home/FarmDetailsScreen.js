@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,52 +6,51 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../context/AuthContext';
+import { getFarmById, getCropsByFarmId } from '../../services/farmApi'; // make sure getCropsByFarmId exists
 
 export default function FarmDetailsScreen() {
-  // Sample farm data
-  const farm = {
-    id: '1',
-    name: 'Green Valley Farm',
-    location: 'Nairobi, Kenya',
-    size: '10 acres',
-    status: 'Active',
-    owner: 'John Doe',
-    createdDate: 'Jan 15, 2024',
-  };
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { farmId } = route.params; // Get farm ID from navigation
+  const { token } = useAuth();
 
-  // Sample crop cycles data
-  const cropCycles = [
-    {
-      id: '1',
-      cropName: 'Maize',
-      plantingDate: 'Feb 1, 2024',
-      harvestDate: 'May 15, 2024',
-      status: 'Growing',
-    },
-    {
-      id: '2',
-      cropName: 'Tomatoes',
-      plantingDate: 'Jan 20, 2024',
-      harvestDate: 'Apr 10, 2024',
-      status: 'Growing',
-    },
-    {
-      id: '3',
-      cropName: 'Beans',
-      plantingDate: 'Dec 1, 2023',
-      harvestDate: 'Mar 1, 2024',
-      status: 'Harvested',
-    },
-    {
-      id: '4',
-      cropName: 'Cabbage',
-      plantingDate: 'Feb 10, 2024',
-      harvestDate: 'May 20, 2024',
-      status: 'Planning',
-    },
-  ];
+  const [farm, setFarm] = useState(null);
+  const [crops, setCrops] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingCrops, setLoadingCrops] = useState(true);
+
+  useEffect(() => {
+    const fetchFarm = async () => {
+      try {
+        const res = await getFarmById(farmId, token);
+        if (res.success) setFarm(res.farm);
+      } catch (error) {
+        console.log('Failed to load farm:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchCrops = async () => {
+      try {
+        const res = await getCropsByFarmId(farmId, token);
+        if (res.success) setCrops(res.crops || []);
+      } catch (error) {
+        console.log('Failed to load crops:', error);
+        setCrops([]);
+      } finally {
+        setLoadingCrops(false);
+      }
+    };
+
+    fetchFarm();
+    fetchCrops();
+  }, [farmId, token]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -66,6 +65,25 @@ export default function FarmDetailsScreen() {
     }
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center bg-green-50">
+        <ActivityIndicator size="large" color="#16a34a" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!farm) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center bg-green-50 px-6">
+        <Ionicons name="leaf-outline" size={70} color="#16a34a" />
+        <Text className="text-2xl font-bold text-gray-800 mt-4">
+          Farm Not Found
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-green-50">
       <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
@@ -73,7 +91,7 @@ export default function FarmDetailsScreen() {
       {/* Header */}
       <View className="bg-green-600 px-5 pt-4 pb-6">
         <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity className="w-10 h-10 items-center justify-center">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="w-10 h-10 items-center justify-center">
             <Ionicons name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
           <TouchableOpacity className="w-10 h-10 items-center justify-center">
@@ -86,9 +104,7 @@ export default function FarmDetailsScreen() {
             <Ionicons name="leaf" size={32} color="#ffffff" />
           </View>
           <View className="flex-1">
-            <Text className="text-2xl font-bold text-white mb-1">
-              {farm.name}
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-1">{farm.name}</Text>
             <View className="flex-row items-center">
               <Ionicons name="location-outline" size={16} color="#bbf7d0" />
               <Text className="text-sm text-green-100 ml-1">{farm.location}</Text>
@@ -105,17 +121,17 @@ export default function FarmDetailsScreen() {
               <View className="flex-1 items-center border-r border-gray-200">
                 <Ionicons name="resize-outline" size={24} color="#16a34a" />
                 <Text className="text-xs text-gray-500 mt-2 mb-1">Farm Size</Text>
-                <Text className="text-lg font-bold text-gray-800">{farm.size}</Text>
+                <Text className="text-lg font-bold text-gray-800">{farm.size || 'N/A'} {farm.unit || ''}</Text>
               </View>
               <View className="flex-1 items-center border-r border-gray-200">
                 <Ionicons name="leaf-outline" size={24} color="#16a34a" />
                 <Text className="text-xs text-gray-500 mt-2 mb-1">Crops</Text>
-                <Text className="text-lg font-bold text-gray-800">{cropCycles.length}</Text>
+                <Text className="text-lg font-bold text-gray-800">{loadingCrops ? '...' : crops.length}</Text>
               </View>
               <View className="flex-1 items-center">
                 <Ionicons name="checkmark-circle-outline" size={24} color="#16a34a" />
                 <Text className="text-xs text-gray-500 mt-2 mb-1">Status</Text>
-                <Text className="text-lg font-bold text-green-600">{farm.status}</Text>
+                <Text className="text-lg font-bold text-green-600">{farm.status || 'N/A'}</Text>
               </View>
             </View>
           </View>
@@ -131,7 +147,7 @@ export default function FarmDetailsScreen() {
               </View>
               <View className="flex-1">
                 <Text className="text-xs text-gray-500">Owner</Text>
-                <Text className="text-base font-semibold text-gray-800">{farm.owner}</Text>
+                <Text className="text-base font-semibold text-gray-800">{farm.owner?.name || 'N/A'}</Text>
               </View>
             </View>
             <View className="h-px bg-gray-200 my-2" />
@@ -141,7 +157,7 @@ export default function FarmDetailsScreen() {
               </View>
               <View className="flex-1">
                 <Text className="text-xs text-gray-500">Created</Text>
-                <Text className="text-base font-semibold text-gray-800">{farm.createdDate}</Text>
+                <Text className="text-base font-semibold text-gray-800">{new Date(farm.createdAt).toLocaleDateString()}</Text>
               </View>
             </View>
           </View>
@@ -157,50 +173,38 @@ export default function FarmDetailsScreen() {
             </TouchableOpacity>
           </View>
 
-          {cropCycles.map((crop) => (
-            <TouchableOpacity key={crop.id} className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
-              <View className="flex-row items-start justify-between mb-2">
-                <View className="flex-1">
-                  <Text className="text-lg font-semibold text-gray-800 mb-1">
-                    {crop.cropName}
-                  </Text>
-                  <View className="flex-row items-center">
-                    <Ionicons name="calendar-outline" size={14} color="#6b7280" />
-                    <Text className="text-xs text-gray-500 ml-1">
-                      Planted: {crop.plantingDate}
+          {loadingCrops ? (
+            <ActivityIndicator size="small" color="#16a34a" />
+          ) : crops.length === 0 ? (
+            <Text className="text-gray-500 text-center py-4">No crops added yet</Text>
+          ) : (
+            crops.map((crop) => (
+              <TouchableOpacity key={crop.id} className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+                <View className="flex-row items-start justify-between mb-2">
+                  <View className="flex-1">
+                    <Text className="text-lg font-semibold text-gray-800 mb-1">{crop.cropName}</Text>
+                    <View className="flex-row items-center">
+                      <Ionicons name="calendar-outline" size={14} color="#6b7280" />
+                      <Text className="text-xs text-gray-500 ml-1">
+                        Planted: {new Date(crop.plantingDate).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  </View>
+                  <View className={`px-3 py-1 rounded-lg ${getStatusColor(crop.status)}`}>
+                    <Text className={`text-xs font-semibold ${getStatusColor(crop.status)}`}>
+                      {crop.status}
                     </Text>
                   </View>
                 </View>
-                <View className={`px-3 py-1 rounded-lg ${getStatusColor(crop.status)}`}>
-                  <Text className={`text-xs font-semibold ${getStatusColor(crop.status)}`}>
-                    {crop.status}
+                <View className="flex-row items-center mt-2">
+                  <Ionicons name="arrow-forward-outline" size={14} color="#6b7280" />
+                  <Text className="text-xs text-gray-500 ml-1">
+                    Harvest: {crop.harvestDate ? new Date(crop.harvestDate).toLocaleDateString() : 'N/A'}
                   </Text>
                 </View>
-              </View>
-              <View className="flex-row items-center mt-2">
-                <Ionicons name="arrow-forward-outline" size={14} color="#6b7280" />
-                <Text className="text-xs text-gray-500 ml-1">
-                  Harvest: {crop.harvestDate}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Action Buttons */}
-        <View className="px-5 pb-6">
-          <TouchableOpacity className="bg-green-600 rounded-xl py-4 items-center mb-3">
-            <View className="flex-row items-center">
-              <Ionicons name="create-outline" size={20} color="#ffffff" />
-              <Text className="text-base font-semibold text-white ml-2">Edit Farm Details</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity className="bg-red-50 border-2 border-red-200 rounded-xl py-4 items-center">
-            <View className="flex-row items-center">
-              <Ionicons name="trash-outline" size={20} color="#dc2626" />
-              <Text className="text-base font-semibold text-red-600 ml-2">Delete Farm</Text>
-            </View>
-          </TouchableOpacity>
+              </TouchableOpacity>
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

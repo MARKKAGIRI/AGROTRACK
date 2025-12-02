@@ -1,30 +1,28 @@
-const express = require('express')
-const cors = require('cors')
-require('dotenv').config()
-const { PrismaClient } = require('./generated/prisma')
-const errorHandler = require('./middleware/errorHandler')
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+const errorHandler = require('./middleware/errorHandler');
 
-
+// Create the app instance
 const app = express();
-const prisma = new PrismaClient();
 
+// Middleware
 app.use(cors()); 
 app.use(express.json());
 
-
+// Routes
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/farms', require('./routes/farmRoutes'));
 app.use('/api/cropCycle', require('./routes/cropCycleRoutes'));
+
+// Test Route
 app.get('/api/test', (req, res) => {
   console.log('✅ /test route was hit from mobile!');
   res.json({ status: 'ok', message: 'Connection successful!' });
 });
 
-// error handler middleware
+// Error Handler (Always last)
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Export the app
+module.exports = app;

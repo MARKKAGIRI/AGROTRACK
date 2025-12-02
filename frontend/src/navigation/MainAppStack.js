@@ -1,14 +1,15 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MainStack from "./MainStack";
 import WeatherScreen from "../screens/Home/WeatherScreen";
-import AllFarmsScreen from "../screens/AllFarms/AllFarmsScreen";
+import AllFarmsScreen from "../screens/Home/AllFarmsScreen";
 import EditCropScreen from "../screens/Lifecycle/EditCropScreen";
 import AddCropScreen from "../screens/Lifecycle/AddCropScreen";
-import CropTasks from "../screens/CropTasks/CropTasks";
-import ChatScreen from "../screens/chat/chat";
+import CropTasks from "../screens/Home/Tasks";
+import ChatScreen from "../screens/Home/chat";
 import UpdateProfileScreen from "../screens/Profile/UpdateProfileScreen";
-import SettingsScreen from "../screens/settings/SettingsScreen";
+import SettingsScreen from "../screens/Profile/SettingsScreen";
 import AddFarm from "../screens/Home/AddFarm";
+import FarmDetailsScreen from "../screens/Home/FarmDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -96,6 +97,14 @@ export default function MainAppStack() {
        <Stack.Screen
         name="AddFarm"
         component={AddFarm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="FarmDetails"
+        component={FarmDetailsScreen}
         options={{
           headerShown: false,
         }}

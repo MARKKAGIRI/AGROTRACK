@@ -35,21 +35,36 @@ export const getAllFarms = async (userId, token) => {
   }
 };
 
-// OPTIONAL: Get single farm
-export const getFarmById = async (farmId) => {
+// Get single farm by ID
+export const getFarmById = async (farmId, token) => {
   try {
-    const response = await api.get(`/farms/getSingleFarm/${farmId}`);
-    return response.data;
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+    const response = await api.get(`/farms/getSingleFarm/${farmId}`, config);
+    return response.data; // should return { success: true, farm: {...} }
   } catch (error) {
+    console.log("getFarmById error:", error);
     throw error.response?.data || error.message;
   }
 };
 
+// Get crops for a specific farm
+export const getCropsByFarmId = async (farmId, token) => {
+  try {
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+    const response = await api.get(`/cropCycle/${farmId}/crops`, config);
+    return response.data; // should return { success: true, count: n, crops: [...] }
+  } catch (error) {
+    console.log("getCropsByFarmId error:", error);
+    throw error.response?.data || error.message;
+  }
+};
+
+
 // Add a new farm
-export const addFarm = async (farmData, ownerId, token) => {
+export const addFarm = async (farmData, token) => {
   try {
    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-    const response = await api.post(`/farms/addFarm/${ownerId}`, farmData, config);
+    const response = await api.post(`/farms/addFarm/`, farmData, config);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

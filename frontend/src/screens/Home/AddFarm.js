@@ -154,11 +154,10 @@ const AddFarm = ({ navigation }) => {
 			photo, // you may handle uploading separately
 		};
 
-		const data = await addFarmApi(payload, user.user_id, token); // <-- use API service
+		const data = await addFarmApi(payload, token);
 
 		Alert.alert("Success", "Farm added successfully");
 
-		// Reset form
 		setName("");
 		setLocationText("");
 		setSize("");

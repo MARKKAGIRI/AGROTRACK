@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 const Home = () => {
   const navigation = useNavigation();
   const { user, token } = useAuth();
+  // console.log(token, user)
 
   return (
     <SafeAreaView className="flex-1 bg-[#F6FAF7]">
