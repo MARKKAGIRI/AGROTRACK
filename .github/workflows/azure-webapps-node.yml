@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,6 +29,19 @@ jobs:
       run: |
         cd backend
         npm install
+
+    - name: Set environment variables for tests
+      run: |
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL_TEST }}" >> $GITHUB_ENV
+
+    - name: Run tests
+      run: |
+        cd backend
+        npm test
+
+    - name: Build backend (only after tests pass)
+      run: |
+        cd backend
         npm run build --if-present
 
     - name: Upload backend artifact
@@ -38,7 +51,7 @@ jobs:
         path: backend
 
   deploy:
-    needs: build
+    needs: build-and-test
     runs-on: ubuntu-latest
 
     steps:
@@ -52,4 +65,4 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ./ # deploys the extracted backend folder
+        package: ./ # deploy backend folder
