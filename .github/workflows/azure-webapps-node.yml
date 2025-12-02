@@ -33,7 +33,7 @@ jobs:
     - name: Generate Prisma Client
       run: |
         cd backend
-        npx prisma generate
+        npx prisma generate --schema=./src/prisma/schema.prisma
 
     - name: Set environment variables for tests
       run: |
