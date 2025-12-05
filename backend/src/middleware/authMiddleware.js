@@ -7,7 +7,7 @@ const tokenValidator = async (req, res, next) => {
     if (authHeader && authHeader.startsWith("Bearer")) {
       const token = authHeader.split(" ")[1];
 
-      jwt.verify(token, process.env.jwtSecret, (err, decoded) => {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
           return res.status(401).json({ error: "Unauthorized", message: err.message });
         }

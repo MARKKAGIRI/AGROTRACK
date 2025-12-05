@@ -16,12 +16,14 @@ const getAllFarms = async (req, res) => {
     });
 
     // Map farms to include analytics
-    const formattedFarms = farms.map(farm => {
+    const formattedFarms = farms.map((farm) => {
       const totalCrops = farm.cropCycles.length || 0;
-      const totalHarvested = farm.cropCycles.filter(c => c.harvestDate).length || 0;
-      const upcomingHarvest = farm.cropCycles
-        .filter(c => c.harvestDate && new Date(c.harvestDate) > new Date())
-        .length || 0;
+      const totalHarvested =
+        farm.cropCycles.filter((c) => c.harvestDate).length || 0;
+      const upcomingHarvest =
+        farm.cropCycles.filter(
+          (c) => c.harvestDate && new Date(c.harvestDate) > new Date()
+        ).length || 0;
 
       return {
         id: farm.id,
@@ -39,7 +41,7 @@ const getAllFarms = async (req, res) => {
           totalCrops,
           totalHarvested,
           upcomingHarvest,
-        }
+        },
       };
     });
 
@@ -57,7 +59,6 @@ const getAllFarms = async (req, res) => {
     });
   }
 };
-
 
 // Controller to get a single farm by ID
 const getSingleFarm = async (req, res) => {
@@ -109,6 +110,14 @@ const addFarm = async (req, res) => {
     const userId = req.user.user_id; // taken from authenticated token
     const { name, location, size, unit, type, crops, notes } = req.body;
 
+    // ensure that the required fields are there
+    if (!name || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing!!",
+      });
+    }
+
     // Verify user exists
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
@@ -137,7 +146,6 @@ const addFarm = async (req, res) => {
       message: "Farm created successfully",
       farm,
     });
-
   } catch (error) {
     console.error("Add farm error:", error);
     return res.status(500).json({
@@ -148,12 +156,19 @@ const addFarm = async (req, res) => {
   }
 };
 
-
 // Controller to update an existing farm
 const updateFarm = async (req, res) => {
   try {
     const { farmId } = req.params;
     const { name, location, size, unit, type, crops, notes } = req.body;
+
+    // check for missing values
+    if (!name && !location && !size && !unit && !type && !crops && !notes) {
+      return res.status(400).json({
+        success: false,
+        message: "No update fields provided",
+      });
+    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -164,11 +179,18 @@ const updateFarm = async (req, res) => {
 
     const farm = await prisma.farm.findUnique({ where: { id: farmId } });
     if (!farm) {
-      return res.status(404).json({ success: false, message: "Farm not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Farm not found" });
     }
 
     if (farm.ownerId !== userId) {
-      return res.status(403).json({ success: false, message: "You are not authorized to update this farm" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "You are not authorized to update this farm",
+        });
     }
 
     const updatedFarm = await prisma.farm.update({
@@ -191,7 +213,9 @@ const updateFarm = async (req, res) => {
     });
   } catch (error) {
     console.error("Update farm error:", error);
-    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -203,7 +227,9 @@ const deleteFarm = async (req, res) => {
 
     const farm = await prisma.farm.findUnique({ where: { id: farmId } });
     if (!farm) {
-      return res.status(404).json({ success: false, message: "Farm not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Farm not found" });
     }
 
     if (farm.ownerId !== userId) {
@@ -215,11 +241,21 @@ const deleteFarm = async (req, res) => {
 
     await prisma.farm.delete({ where: { id: farmId } });
 
-    return res.status(200).json({ success: true, message: "Farm deleted successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Farm deleted successfully" });
   } catch (error) {
     console.error("Delete farm error:", error);
-    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-module.exports = { deleteFarm, addFarm, updateFarm, getAllFarms, getSingleFarm };
+module.exports = {
+  deleteFarm,
+  addFarm,
+  updateFarm,
+  getAllFarms,
+  getSingleFarm,
+};

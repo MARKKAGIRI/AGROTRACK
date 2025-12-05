@@ -5,6 +5,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+
 // initialize the google auth client
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -17,6 +18,7 @@ const login = async (req, res) => {
     // 2. Check if both email and password are provided
     if (!email || !password) {
       return res.status(400).json({
+        success: false,
         error: "All fields are required",
       });
     }
@@ -29,7 +31,8 @@ const login = async (req, res) => {
     // 4. If user is not registered, return 401
     if (!user) {
       return res.status(401).json({
-        error: "Email or password is invalid",
+        success: false,
+        error: "Email not found",
       });
     }
 
@@ -39,7 +42,8 @@ const login = async (req, res) => {
     //6. If password does not match, return 401
     if (!isPasswordValid) {
       return res.status(401).json({
-        error: "Email or password is invalid",
+        success: false,
+        error: "Password is invalid",
       });
     }
 

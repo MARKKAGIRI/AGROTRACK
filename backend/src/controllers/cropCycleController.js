@@ -97,10 +97,10 @@ const addCrop = async (req, res) => {
 
 // Controller to update a crop
 const updateCrop = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  // const errors = validationResult(req);
+  // if (!errors.isEmpty()) {
+  //   return res.status(400).json({ errors: errors.array() });
+  // }
 
   try {
     const { farmId, cropId } = req.params;
@@ -162,47 +162,61 @@ const updateCrop = async (req, res) => {
   }
 };
 
+// Replace the existing deleteCrop with this
 const deleteCrop = async (req, res) => {
   try {
-    const { id } = req.params;
+    // read the actual route params
+    const { farmId, cropId } = req.params;
     const userId = req.user.user_id;
 
+    // find the crop and include its farm
     const cropCycle = await prisma.cropCycle.findUnique({
-      where: { id },
+      where: { id: cropId },
       include: { farm: true },
     });
 
     if (!cropCycle) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Crop cycle not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Crop cycle not found",
       });
     }
 
-    if (cropCycle.farm.ownerId !== userId) {
-      return res.status(403).json({ 
-        success: false, 
-        message: "You can only delete crops from your own farm" 
+    // optional: ensure the crop belongs to the farmId in the URL
+    if (cropCycle.farmId !== farmId && String(cropCycle.farm?.id) !== String(farmId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Crop does not belong to this farm",
       });
     }
 
-    // All tasks with this cropId will be automatically deleted!
+    // ownership check
+    if (cropCycle.farm?.ownerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete crops from your own farm",
+      });
+    }
+
+    // delete
     await prisma.cropCycle.delete({
-      where: { id },
+      where: { id: cropId },
     });
 
-    res.status(200).json({ 
-      success: true, 
-      message: "Crop cycle deleted successfully" 
+    return res.status(200).json({
+      success: true,
+      message: "Crop cycle deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error", 
-      error: error.message 
+    console.error("Delete crop error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
     });
   }
 };
+
 
 
 

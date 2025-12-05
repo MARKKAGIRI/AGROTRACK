@@ -62,13 +62,15 @@ export default function Login() {
 
   const handleSubmit = async () => {
     if (!validate()) return;
+    console.log(formData)
     try {
       setIsLoginButtonLoading(true)
       const data = await loginUser(formData);
       login(data.user, data.token)
+      // console.log(data.user, data.token)
     } catch (error) {
        console.error("Login Failed", error);
-      Alert.alert("Login Failed", "Invalid email or password. Please try again.");
+     
     }finally{
       setIsLoginButtonLoading(false)
     }

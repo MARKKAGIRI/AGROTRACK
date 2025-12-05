@@ -5,7 +5,7 @@ const { tokenValidator } = require("../middleware/authMiddleware");
 
 
 // public route
-router.get("/getAllFarms/:userId", tokenValidator, getAllFarms )
+router.get("/getAllFarms/", tokenValidator, getAllFarms )
 
 router.get("/getSingleFarm/:farmId", tokenValidator, getSingleFarm );
 
