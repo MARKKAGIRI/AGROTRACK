@@ -24,10 +24,11 @@ export const setAuthToken = (token) => {
 // ==========================
 
 // Get all farms for logged-in user
-export const getAllFarms = async (userId, token) => {
+export const getAllFarms = async (token) => {
   try {
     const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-    const response = await api.get(`/farms/getAllFarms/${userId}`, config);
+    console.log(token)
+    const response = await api.get(`/farms/getAllFarms/`, config);
     return response.data;
   } catch (error) {
     console.log("getAllFarms error:", error);

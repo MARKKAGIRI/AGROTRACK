@@ -9,21 +9,25 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export default function UpdateProfileScreen() {
   const [fullName, setFullName] = useState('John Doe');
   const [email, setEmail] = useState('johndoe@example.com');
   const [phone, setPhone] = useState('+254 712 345 678');
   const [location, setLocation] = useState('Nairobi, Kenya');
+  const navigation = useNavigation()
 
   return (
     <SafeAreaView className="flex-1 bg-green-50">
       <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
 
       {/* Header */}
-      <View className="bg-green-600 px-5 pt-4 pb-6">
+      <View className="bg-green-600 px-5 pt-4 pb-3">
         <View className="flex-row items-center justify-between mb-6">
-          <TouchableOpacity className="w-10 h-10 items-center justify-center">
+          <TouchableOpacity className="w-10 h-10 items-center justify-center"
+           onPress={() =>{navigation.goBack()} 
+          }>
             <Ionicons name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-white">Edit Profile</Text>
@@ -33,7 +37,7 @@ export default function UpdateProfileScreen() {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Picture Section */}
-        <View className="items-center -mt-12 mb-6">
+        <View className="items-center mb-6">
           <View className="relative">
             <View className="w-24 h-24 rounded-full bg-white items-center justify-center shadow-lg">
               <View className="w-20 h-20 rounded-full bg-green-100 items-center justify-center">

@@ -54,7 +54,7 @@ const Profile = () => {
       subtitle: 'Manage your privacy settings',
       color: '#0284c7',
       onPress: () => {
-        Alert.alert('Privacy & Security', 'Navigate to privacy screen');
+        navigation.navigate("Privacy")
       },
     },
     {
@@ -63,7 +63,7 @@ const Profile = () => {
       subtitle: 'Get help and contact support',
       color: '#ca8a04',
       onPress: () => {
-        Alert.alert('Help & Support', 'Navigate to help screen');
+        navigation.navigate("Help")
       },
     },
     {
@@ -72,7 +72,7 @@ const Profile = () => {
       subtitle: 'App version and information',
       color: '#7c3aed',
       onPress: () => {
-        Alert.alert('About', 'AgroTrack+ v1.0.0\n\nYour smart farming companion');
+        navigation.navigate("About")
       },
     },
   ];

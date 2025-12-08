@@ -10,6 +10,10 @@ import UpdateProfileScreen from "../screens/Profile/UpdateProfileScreen";
 import SettingsScreen from "../screens/Profile/SettingsScreen";
 import AddFarm from "../screens/Home/AddFarm";
 import FarmDetailsScreen from "../screens/Home/FarmDetailsScreen";
+import PrivacyScreen from "../screens/Profile/Privacy";
+import HelpSupport from "../screens/Profile/HelpSupport";
+import About from "../screens/Profile/About";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -105,6 +109,27 @@ export default function MainAppStack() {
       <Stack.Screen
         name="FarmDetails"
         component={FarmDetailsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Privacy"
+        component={PrivacyScreen}
+        options={{
+          headerShown: false,
+        }} 
+      />
+      <Stack.Screen
+        name="Help"
+        component={HelpSupport}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="About"
+        component={About}
         options={{
           headerShown: false,
         }}

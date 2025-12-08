@@ -9,11 +9,13 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export default function SettingsScreen() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const navigation = useNavigation();
 
   const SettingsItem = ({ icon, title, subtitle, onPress, showArrow = true, rightComponent }) => (
     <TouchableOpacity 
@@ -54,35 +56,18 @@ export default function SettingsScreen() {
       {/* Header */}
       <View className="bg-green-600 px-5 pt-4 pb-6 rounded-b-3xl">
         <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity className="w-10 h-10 items-center justify-center">
+          <TouchableOpacity className="w-10 h-10 items-center justify-center"
+           onPress={() => {navigation.goBack()}}>
             <Ionicons name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
           <Text className="text-xl font-bold text-white">Settings</Text>
           <View className="w-10" />
         </View>
-
-        {/* User Profile Card */}
-        <TouchableOpacity className="bg-white/10 rounded-2xl p-4 flex-row items-center">
-          <View className="w-14 h-14 rounded-full bg-white/20 items-center justify-center mr-3">
-            <Ionicons name="person" size={28} color="#ffffff" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-lg font-bold text-white">John Doe</Text>
-            <Text className="text-sm text-green-100">johndoe@example.com</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#ffffff" />
-        </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1 px-5 pt-6" showsVerticalScrollIndicator={false}>
         {/* Account Section */}
         <SettingsSection title="Account">
-          <SettingsItem
-            icon="person-outline"
-            title="Edit Profile"
-            subtitle="Update your personal information"
-            onPress={() => {}}
-          />
           <SettingsItem
             icon="lock-closed-outline"
             title="Change Password"
@@ -166,56 +151,6 @@ export default function SettingsScreen() {
             onPress={() => {}}
           />
         </SettingsSection>
-
-        {/* Support Section */}
-        <SettingsSection title="Support">
-          <SettingsItem
-            icon="help-circle-outline"
-            title="Help Center"
-            subtitle="Get help and support"
-            onPress={() => {}}
-          />
-          <SettingsItem
-            icon="chatbubble-outline"
-            title="Contact Us"
-            subtitle="Send us a message"
-            onPress={() => {}}
-          />
-          <SettingsItem
-            icon="star-outline"
-            title="Rate AgroTrack+"
-            subtitle="Share your experience"
-            onPress={() => {}}
-          />
-        </SettingsSection>
-
-        {/* About Section */}
-        <SettingsSection title="About">
-          <SettingsItem
-            icon="document-text-outline"
-            title="Terms of Service"
-            onPress={() => {}}
-          />
-          <SettingsItem
-            icon="shield-outline"
-            title="Privacy Policy"
-            onPress={() => {}}
-          />
-          <SettingsItem
-            icon="information-circle-outline"
-            title="App Version"
-            subtitle="1.0.0"
-            showArrow={false}
-          />
-        </SettingsSection>
-
-        {/* Logout Button */}
-        <TouchableOpacity className="bg-red-50 border-2 border-red-200 rounded-xl py-4 items-center mb-8">
-          <View className="flex-row items-center">
-            <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-            <Text className="text-base font-semibold text-red-600 ml-2">Logout</Text>
-          </View>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

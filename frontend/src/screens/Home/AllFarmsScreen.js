@@ -26,7 +26,7 @@ export default function AllFarmsScreen() {
   useEffect(() => {
     const fetchFarms = async () => {
       try {
-        const res = await getAllFarms(user.user_id, token);
+        const res = await getAllFarms(token);
         setFarms(res.farms || []);
       } catch (error) {
         console.log("Failed to load farms:", error);
