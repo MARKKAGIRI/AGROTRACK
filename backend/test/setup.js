@@ -11,12 +11,12 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  // Delete data after every test so the next test starts fresh.
-  // We use a transaction to ensure atomicity.
+ 
     
   const deleteTransactions = [
     prisma.cropCycle.deleteMany(),
     prisma.farm.deleteMany(),
+    // prisma.crops.deleteMany(),
     prisma.user.deleteMany(),
   ];
 

@@ -8,70 +8,157 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User model stays mostly the same
 model User {
-  id       String   @id @default(uuid())
-  name     String
-  email    String   @unique
-  password String
-  role     String   @default("user")
-  location String?
-  advice   Advice[]
-  farms    Farm[]
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("user")
+  location      String?
+  phoneNumber   String?
+  createdAt     DateTime       @default(now())
+
+  farms         Farm[]
+  notifications Notification[]
 }
 
+// Farm stores information about the farm
 model Farm {
-  id        String       @id @default(uuid())
-  name      String
-  size      Float?
-  unit      String?
-  type      String?        // Crop Farm, Livestock, Mixed, etc.
-  location  String
-  crops     Json?          // Array of crop names (legacy)
-  notes     String?
-  ownerId   String
-  cropType  String?
-  
-  cropCycles CropCycle[] @relation("FarmCrops")
-  owner      User         @relation(fields: [ownerId], references: [id])
+  id          String       @id @default(uuid())
+  name        String
+  size        Float?
+  unit        String?
+  type        String?
+  location    String
+  latitude    Float?
+  longitude   Float?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  cropCycles  CropCycle[]  @relation("FarmCrops")
+  weatherLogs WeatherLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
 }
 
+// CropCycle represents a single season for a crop on a farm
 model CropCycle {
   id           String    @id @default(uuid())
-  cropName     String
+  farmId       String
+  farm         Farm      @relation("FarmCrops", fields: [farmId], references: [id])
+
+  cropId       Int
+  crop         Crops     @relation(fields: [cropId], references: [id]) // links to static crop info
+
   plantingDate DateTime
   harvestDate  DateTime?
-  status       String
-  farmId       String
+  status       String    @default("plantend")  // plantend | growing | harvested | failed
 
-  farm         Farm      @relation("FarmCrops", fields: [farmId], references: [id])
   tasks        Task[]
+  expenses     Expense[]
+  revenues     Revenue[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
+// Task is linked to a CropCycle
 model Task {
-  id      String    @id @default(uuid())
-  title   String
-  dueDate DateTime
-  status  String
-  cropId  String
-  crop    CropCycle @relation(fields: [cropId], references: [id])
+  id          String     @id @default(uuid())
+  cropCycleId String
+  cropCycle   CropCycle  @relation(fields: [cropCycleId], references: [id])
+
+  title       String
+  description String?
+  status      String     @default("pending")   // pending | done
+  createdAt   DateTime   @default(now())
 }
 
-model Advice {
-  id        String   @id @default(uuid())
-  message   String
-  createdAt DateTime @default(now())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-}
-
+// Static crop database
 model Crops {
   id         Int      @id @default(autoincrement())
   cropName   String   @unique
   cropType   String
   region     String
-  growthData Json
-  createdAt  DateTime @default(now())
+  growthData Json      // useful info like ideal temp, soil, watering
+  createdAt  DateTime  @default(now())
+
+  cropCycles CropCycle[] // back relation
+}
+
+// Expenses for a crop season
+model Expense {
+  id          String    @id @default(uuid())
+  cropCycleId String
+  cropCycle   CropCycle @relation(fields: [cropCycleId], references: [id], onDelete: Cascade)
+
+  type        String
+  amount      Float
+  description String?
+  date        DateTime
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([cropCycleId])
+  @@index([date])
+}
+
+// Revenue for a crop season
+model Revenue {
+  id          String    @id @default(uuid())
+  cropCycleId String
+  cropCycle   CropCycle @relation(fields: [cropCycleId], references: [id], onDelete: Cascade)
+
+  amount      Float
+  quantity    Float?
+  buyerName   String
+  date        DateTime
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([cropCycleId])
+  @@index([date])
+}
+
+// Notifications
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  message   String
+  type      String   @default("info")  // info | alert | success
+  read      Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([read])
+}
+
+// Weather logs for a farm
+model WeatherLog {
+  id          String   @id @default(uuid())
+  farmId      String
+  farm        Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  temperature Float
+  humidity    Float
+  rainfall    Float
+  windSpeed   Float
+  description String?
+
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([farmId])
+  @@index([date])
 }

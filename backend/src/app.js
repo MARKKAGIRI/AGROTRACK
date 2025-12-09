@@ -14,6 +14,11 @@ app.use(express.json());
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/farms', require('./routes/farmRoutes'));
 app.use('/api/cropCycle', require('./routes/cropCycleRoutes'));
+app.use('/api/activities', require('./routes/activityRoutes'));
+app.use('/api/expenses', require('./routes/expenseRoutes'));
+app.use('/api/revenues', require('./routes/revenueRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/weather', require('./routes/weatherRoutes'));
 
 // Test Route
 app.get('/api/test', (req, res) => {

@@ -82,8 +82,8 @@ describe("POST /api/farms/addFarm - Add Farm", () => {
         size: 5,
         unit: "acres",
         type: "mixed",
-        crops: ["maize", "beans"],
-        notes: "test notes",
+        latitude: -1.286389,
+        longitude: 36.817223,
       });
 
     expect(res.statusCode).toBe(201);
@@ -94,8 +94,8 @@ describe("POST /api/farms/addFarm - Add Farm", () => {
       size: 5,
       unit: "acres",
       type: "mixed",
-      crops: ["maize", "beans"],
-      notes: "test notes",
+      latitude: -1.286389,
+      longitude: 36.817223,
       ownerId: user.id,
     });
   });
@@ -162,8 +162,8 @@ describe("PUT /api/farms/updateFarm/:farmId - update farm", () => {
     expect(res.body.message).toBe("Farm not found")
   });
 
-  // anauthorised user trying to change farm details
-  it("Should return You are not authorised to update this farm", async () => {
+  // unauthorised user trying to change farm details
+  it("Should return Unauthorized", async () => {
     const user = await prisma.user.create({
       data: {
         id: "auth1",
@@ -203,11 +203,11 @@ describe("PUT /api/farms/updateFarm/:farmId - update farm", () => {
 
     expect(res.statusCode).toBe(403)
     expect(res.body.success).toBe(false)
-    expect(res.body.message).toBe("You are not authorized to update this farm")
+    expect(res.body.message).toBe("Unauthorized")
   })
 
   // successful update the farm
-  it("Should return 'Farm updated successfully'", async () => {
+  it("Should return 'Farm updated'", async () => {
     const user = await prisma.user.create({
       data: {
         id: "auth1",
@@ -237,7 +237,7 @@ describe("PUT /api/farms/updateFarm/:farmId - update farm", () => {
 
     expect(res.statusCode).toBe(200)
     expect(res.body.success).toBe(true)
-    expect(res.body.message).toBe("Farm updated successfully")
+    expect(res.body.message).toBe("Farm updated")
   })
 
 });
@@ -276,6 +276,35 @@ describe("GET /api/farms/getAllFarms - Get All Farms", () => {
       },
     });
 
+    // Create a crop in the Crops table
+    const uniqueCropName = `maizeCrop_${Date.now()}`; // Ensure unique crop name
+    const maizeCrop = await prisma.crops.create({
+      data: {
+        cropName: uniqueCropName,
+        cropType: "Cereal",
+        region: "Kenya",
+        growthData: {
+          idealTemp: "20-30°C",
+          soilType: "Loamy",
+          wateringFrequency: "Regular"
+        }
+      }
+    });
+
+    const uniqueBeanCropName = `beansCrop_${Date.now()}`
+    const beansCrop = await prisma.crops.create({
+      data: {
+        cropName: uniqueBeanCropName,
+        cropType: "Legume",
+        region: "Kenya",
+        growthData: {
+          idealTemp: "18-25°C",
+          soilType: "Well-drained",
+          wateringFrequency: "Moderate"
+        }
+      }
+    });
+
     // Create multiple farms for the user
     const farm1 = await prisma.farm.create({
       data: {
@@ -306,7 +335,7 @@ describe("GET /api/farms/getAllFarms - Get All Farms", () => {
       data: {
         id: "cycle1",
         farmId: farm1.id,
-        cropName: "maize",
+        cropId: maizeCrop.id,
         plantingDate: new Date("2024-01-01"),
         harvestDate: new Date("2024-06-01"),
         status: "growing"
@@ -317,7 +346,7 @@ describe("GET /api/farms/getAllFarms - Get All Farms", () => {
       data: {
         id: "cycle2",
         farmId: farm1.id,
-        cropName: "beans",
+        cropId: beansCrop.id,
         plantingDate: new Date("2024-03-01"),
         harvestDate: new Date("2025-12-01"),
         status: "growing"
@@ -453,7 +482,7 @@ describe("GET /api/farms/getSingleFarm/:farmId - Get Single Farm", () => {
 
     expect(res.statusCode).toBe(403);
     expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe("You are not authorized to access this farm");
+    expect(res.body.message).toBe("Unauthorized");
   });
 
   // 3. Should successfully return farm details for authorized user
@@ -475,8 +504,8 @@ describe("GET /api/farms/getSingleFarm/:farmId - Get Single Farm", () => {
         size: 20,
         unit: "acres",
         type: "mixed",
-        crops: ["tomatoes", "potatoes"],
-        notes: "Best farm ever",
+        latitude: -1.286389,
+        longitude: 36.817223,
         ownerId: user.id,
       },
     });
@@ -496,8 +525,8 @@ describe("GET /api/farms/getSingleFarm/:farmId - Get Single Farm", () => {
       size: 20,
       unit: "acres",
       type: "mixed",
-      crops: ["tomatoes", "potatoes"],
-      notes: "Best farm ever",
+      latitude: -1.286389,
+      longitude: 36.817223,
       ownerId: user.id,
     });
   });
@@ -563,7 +592,7 @@ describe("DELETE /api/farms/deleteFarm/:farmId - Delete Farm", () => {
 
     expect(res.statusCode).toBe(403);
     expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe("You are not authorized to delete this farm");
+    expect(res.body.message).toBe("Unauthorized");
 
     // Verify farm still exists
     const farmCheck = await prisma.farm.findUnique({
@@ -600,7 +629,7 @@ describe("DELETE /api/farms/deleteFarm/:farmId - Delete Farm", () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.message).toBe("Farm deleted successfully");
+    expect(res.body.message).toBe("Farm deleted");
 
     // Verify farm is actually deleted
     const deletedFarm = await prisma.farm.findUnique({

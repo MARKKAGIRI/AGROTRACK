@@ -22,9 +22,15 @@ const getCrops = async (req, res) => {
       });
     }
 
-    // Get all crops for this farm
+    // Get all crop cycles for this farm with crop details
     const crops = await prisma.cropCycle.findMany({
       where: { farmId },
+      include: {
+        crop: true, // Include static crop information
+        tasks: true,
+        expenses: true,
+        revenues: true,
+      },
       orderBy: { plantingDate: "desc" },
     });
 
@@ -43,7 +49,7 @@ const getCrops = async (req, res) => {
   }
 };
 
-// Controller to add a new crop
+// Controller to add a new crop cycle
 const addCrop = async (req, res) => {
   // Validate request body
   const errors = validationResult(req);
@@ -52,7 +58,7 @@ const addCrop = async (req, res) => {
   }
 
   try {
-    const { cropName, plantingDate, harvestDate, status } = req.body;
+    const { cropId, plantingDate, harvestDate, status } = req.body;
     const { farmId } = req.params;
     const userId = req.user.user_id;
 
@@ -70,13 +76,27 @@ const addCrop = async (req, res) => {
       });
     }
 
+    // Verify that the crop exists in the Crops table
+    const cropExists = await prisma.crops.findUnique({
+      where: { id: parseInt(cropId) },
+    });
+    if (!cropExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Crop not found in database",
+      });
+    }
+
     const cropCycle = await prisma.cropCycle.create({
       data: {
-        cropName,
-        plantingDate: new Date(plantingDate),
-        harvestDate: new Date(harvestDate),
         farmId,
-        status,
+        cropId: parseInt(cropId),
+        plantingDate: new Date(plantingDate),
+        harvestDate: harvestDate ? new Date(harvestDate) : null,
+        status: status || "plantend",
+      },
+      include: {
+        crop: true, // Return crop details
       },
     });
 
@@ -95,16 +115,11 @@ const addCrop = async (req, res) => {
   }
 };
 
-// Controller to update a crop
+// Controller to update a crop cycle
 const updateCrop = async (req, res) => {
-  // const errors = validationResult(req);
-  // if (!errors.isEmpty()) {
-  //   return res.status(400).json({ errors: errors.array() });
-  // }
-
   try {
     const { farmId, cropId } = req.params;
-    const { cropName, plantingDate, harvestDate, status } = req.body;
+    const { cropId: newCropId, plantingDate, harvestDate, status } = req.body;
     const userId = req.user.user_id;
 
     // Check if farm exists and belongs to user
@@ -122,34 +137,53 @@ const updateCrop = async (req, res) => {
       });
     }
 
-    // Check if crop exists and belongs to this farm
-    const crop = await prisma.cropCycle.findUnique({ where: { id: cropId } });
-    if (!crop) {
+    // Check if crop cycle exists and belongs to this farm
+    const cropCycle = await prisma.cropCycle.findUnique({ 
+      where: { id: cropId },
+      include: { crop: true },
+    });
+    if (!cropCycle) {
       return res.status(404).json({ 
         success: false, 
-        message: "Crop not found" 
+        message: "Crop cycle not found" 
       });
     }
-    if (crop.farmId !== farmId) {
+    if (cropCycle.farmId !== farmId) {
       return res.status(400).json({ 
         success: false, 
-        message: "Crop does not belong to this farm" 
+        message: "Crop cycle does not belong to this farm" 
       });
+    }
+
+    // If updating cropId, verify the new crop exists
+    if (newCropId && parseInt(newCropId) !== cropCycle.cropId) {
+      const cropExists = await prisma.crops.findUnique({
+        where: { id: parseInt(newCropId) },
+      });
+      if (!cropExists) {
+        return res.status(404).json({
+          success: false,
+          message: "New crop not found in database",
+        });
+      }
     }
 
     const updatedCrop = await prisma.cropCycle.update({
       where: { id: cropId },
       data: {
-        cropName: cropName || crop.cropName,
-        plantingDate: plantingDate ? new Date(plantingDate) : crop.plantingDate,
-        harvestDate: harvestDate ? new Date(harvestDate) : crop.harvestDate,
-        status: status || crop.status,
+        cropId: newCropId ? parseInt(newCropId) : cropCycle.cropId,
+        plantingDate: plantingDate ? new Date(plantingDate) : cropCycle.plantingDate,
+        harvestDate: harvestDate ? new Date(harvestDate) : cropCycle.harvestDate,
+        status: status || cropCycle.status,
+      },
+      include: {
+        crop: true, // Return updated crop details
       },
     });
 
     return res.status(200).json({
       success: true,
-      message: "Crop updated successfully",
+      message: "Crop cycle updated successfully",
       crop: updatedCrop,
     });
   } catch (error) {
@@ -162,14 +196,13 @@ const updateCrop = async (req, res) => {
   }
 };
 
-// Replace the existing deleteCrop with this
+// Delete a crop cycle
 const deleteCrop = async (req, res) => {
   try {
-    // read the actual route params
     const { farmId, cropId } = req.params;
     const userId = req.user.user_id;
 
-    // find the crop and include its farm
+    // Find the crop cycle and include its farm
     const cropCycle = await prisma.cropCycle.findUnique({
       where: { id: cropId },
       include: { farm: true },
@@ -182,15 +215,15 @@ const deleteCrop = async (req, res) => {
       });
     }
 
-    // optional: ensure the crop belongs to the farmId in the URL
-    if (cropCycle.farmId !== farmId && String(cropCycle.farm?.id) !== String(farmId)) {
+    // Ensure the crop cycle belongs to the farmId in the URL
+    if (cropCycle.farmId !== farmId) {
       return res.status(400).json({
         success: false,
-        message: "Crop does not belong to this farm",
+        message: "Crop cycle does not belong to this farm",
       });
     }
 
-    // ownership check
+    // Ownership check
     if (cropCycle.farm?.ownerId !== userId) {
       return res.status(403).json({
         success: false,
@@ -198,7 +231,7 @@ const deleteCrop = async (req, res) => {
       });
     }
 
-    // delete
+    // Delete the crop cycle
     await prisma.cropCycle.delete({
       where: { id: cropId },
     });
@@ -217,13 +250,9 @@ const deleteCrop = async (req, res) => {
   }
 };
 
-
-
-
 module.exports = {
   getCrops,
   addCrop,
-  deleteCrop,
   updateCrop,
   deleteCrop,
 };

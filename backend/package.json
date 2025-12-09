@@ -5,7 +5,7 @@
   "scripts": {
     "test": "dotenv -e .env.test -- jest --runInBand",
     "db:test:push": "dotenv -e .env.test -- npx prisma db push --schema=./src/prisma/schema.prisma",
-    "generate": "npx prisma generate",
+    "generate": "cross-env DOTENV_CONFIG_PATH=.env.test npx prisma generate --schema=./src/prisma/schema.prisma",
     "dev": "nodemon src/index.js",
     "start": "node src/index.js"
   },
@@ -15,6 +15,7 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.16.3",
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
