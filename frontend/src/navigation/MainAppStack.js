@@ -14,7 +14,6 @@ import PrivacyScreen from "../screens/Profile/Privacy";
 import HelpSupport from "../screens/Profile/HelpSupport";
 import About from "../screens/Profile/About";
 
-
 const Stack = createNativeStackNavigator();
 
 export default function MainAppStack() {
@@ -37,14 +36,14 @@ export default function MainAppStack() {
       />
 
       <Stack.Screen
-      name="AllFarms"
-      component={AllFarmsScreen}
-      options={{
-        headerShown: false,
+        name="AllFarms"
+        component={AllFarmsScreen}
+        options={{
+          headerShown: false,
         }}
-    />
+      />
 
-    <Stack.Screen
+      <Stack.Screen
         name="EditCrop"
         component={EditCropScreen}
         options={{
@@ -98,11 +97,16 @@ export default function MainAppStack() {
         }}
       />
 
-       <Stack.Screen
+      <Stack.Screen
         name="AddFarm"
         component={AddFarm}
         options={{
-          headerShown: false,
+          title: "Add Crops",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
 
@@ -118,7 +122,7 @@ export default function MainAppStack() {
         component={PrivacyScreen}
         options={{
           headerShown: false,
-        }} 
+        }}
       />
       <Stack.Screen
         name="Help"
@@ -134,10 +138,6 @@ export default function MainAppStack() {
           headerShown: false,
         }}
       />
-
     </Stack.Navigator>
   );
 }
-
-      
-  
