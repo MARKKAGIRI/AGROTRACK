@@ -23,8 +23,8 @@ const cropValidation = [
     }),
   body("status")
     .optional()
-    .isIn(["plantend", "growing", "harvested"])
-    .withMessage("Status must be plantend, growing, or harvested"),
+    .isIn(["planted", "growing", "harvested"])
+    .withMessage("Status must be planted, growing, or harvested"),
 ];
 
 module.exports = cropValidation

@@ -57,7 +57,7 @@ model CropCycle {
 
   plantingDate DateTime
   harvestDate  DateTime?
-  status       String    @default("plantend")  // plantend | growing | harvested | failed
+  status       String    @default("planted")  // planted | growing | harvested | failed
 
   tasks        Task[]
   expenses     Expense[]

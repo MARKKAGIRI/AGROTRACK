@@ -19,6 +19,17 @@ export const setAuthToken = (token) => {
   }
 };
 
+export const getAllCrops = async (token) => {
+  try {
+    const res = await api.get('/crops', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+  } catch (e) {
+    throw e;
+  }
+};
+
 // Get all crops for a farm
 export const getCropsByFarm = async (farmId) => {
   try {
@@ -30,15 +41,30 @@ export const getCropsByFarm = async (farmId) => {
   }
 };
 
+
 // Add a new crop cycle
-export const addCrop = async (farmId, cropData) => {
+export const addCropCycle = async (farmId, data, token) => {
   try {
-    const response = await api.post(`/farms/${farmId}/crops`, cropData);
-    return response.data;
+    console.log("Data:", farmId);
+
+    const res = await api.post(
+      `/cropCycle/${farmId}/crops`, // endpoint
+      data, // request body
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return res.data; // Axios returns the response in .data
   } catch (error) {
-    throw error.response?.data || error.message;
+    console.log("Add crop cycle error:", error.response?.data || error.message);
+    return { success: false, error: error.response?.data?.message || "Network error" };
   }
 };
+
 
 // Update a crop cycle
 export const updateCrop = async (farmId, cropId, cropData) => {

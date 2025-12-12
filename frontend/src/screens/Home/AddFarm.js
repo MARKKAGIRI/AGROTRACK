@@ -80,9 +80,7 @@ const AddFarm = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F5F0]">
-		{/* Header */}
-      
+    <SafeAreaView className="flex-1 bg-[#F5F5F0]">      
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <View className="bg-white rounded-xl p-6 shadow-md">

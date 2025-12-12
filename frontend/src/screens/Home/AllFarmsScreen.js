@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   FlatList,
-  StatusBar,
+  RefreshControl,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,6 +19,7 @@ export default function AllFarmsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [farms, setFarms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
   const { user, token } = useAuth();
 
@@ -38,6 +39,20 @@ export default function AllFarmsScreen() {
     fetchFarms();
   }, []);
 
+  // fetch farms again on refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      const res = await getAllFarms(token);
+      setFarms(res.farms || []);
+    } catch (error) {
+      console.log("Failed to load farms:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   // Filter based on search
   const filteredFarms = farms.filter((farm) =>
     farm.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -45,7 +60,11 @@ export default function AllFarmsScreen() {
 
   // Farm card UI
   const renderFarmCard = ({ item }) => {
-    const analytics = item.analytics || { totalCrops: 0, totalHarvested: 0, upcomingHarvest: 0 };
+    const analytics = item.analytics || {
+      totalCrops: 0,
+      totalHarvested: 0,
+      upcomingHarvest: 0,
+    };
 
     return (
       <TouchableOpacity className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
@@ -62,7 +81,9 @@ export default function AllFarmsScreen() {
 
             <View className="flex-row items-center">
               <Ionicons name="location-outline" size={14} color="#6b7280" />
-              <Text className="text-sm text-gray-500 ml-1">{item.location}</Text>
+              <Text className="text-sm text-gray-500 ml-1">
+                {item.location}
+              </Text>
             </View>
           </View>
         </View>
@@ -105,7 +126,9 @@ export default function AllFarmsScreen() {
         {/* View details button */}
         <TouchableOpacity
           className="flex-row items-center justify-center py-2.5"
-          onPress={() => navigation.navigate("FarmDetails", { farmId: item.id })}
+          onPress={() =>
+            navigation.navigate("FarmDetails", { farmId: item.id })
+          }
         >
           <Text className="text-sm font-semibold text-green-600 mr-1">
             View Details
@@ -118,24 +141,6 @@ export default function AllFarmsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-green-50">
-      <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
-
-      {/* Header */}
-      <View className="bg-green-600 px-5 py-6 flex-row justify-between items-center rounded-b-3xl">
-        <View>
-          <Text className="text-3xl font-bold text-white">My Farms</Text>
-          <Text className="text-sm text-green-100 mt-1">
-            {farms.length} farms total
-          </Text>
-        </View>
-        <TouchableOpacity
-          className="w-12 h-12 rounded-full bg-white/20 items-center justify-center"
-          onPress={() => navigation.navigate("AddFarm")}
-        >
-          <Ionicons name="add" size={24} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
-
       {/* Search Bar */}
       <View className="flex-row items-center bg-white mx-5 my-4 px-4 rounded-xl border border-gray-200">
         <Ionicons name="search-outline" size={20} color="#6b7280" />
@@ -183,8 +188,26 @@ export default function AllFarmsScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       )}
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate("AddFarm")}
+        style={{
+          position: "absolute",
+          bottom: 40,
+          right: 20,
+          backgroundColor: "#28a745",
+          padding: 16,
+          borderRadius: 30,
+          elevation: 6,
+        }}
+      >
+        <Ionicons name="add" size={30} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

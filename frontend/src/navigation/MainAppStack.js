@@ -39,7 +39,12 @@ export default function MainAppStack() {
         name="AllFarms"
         component={AllFarmsScreen}
         options={{
-          headerShown: false,
+          title: "Add Crops",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
 
@@ -59,7 +64,10 @@ export default function MainAppStack() {
         options={{
           title: "Add Crops",
           headerBackTitleVisible: false,
-          headerTintColor: "#2e7d32",
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
 
@@ -101,7 +109,7 @@ export default function MainAppStack() {
         name="AddFarm"
         component={AddFarm}
         options={{
-          title: "Add Crops",
+          title: "New Farm",
           headerBackTitleVisible: false,
           headerTintColor: "#fff",
           headerStyle: {
@@ -114,7 +122,12 @@ export default function MainAppStack() {
         name="FarmDetails"
         component={FarmDetailsScreen}
         options={{
-          headerShown: false,
+          title: "My Farms",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
       <Stack.Screen
