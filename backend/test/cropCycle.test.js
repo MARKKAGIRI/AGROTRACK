@@ -84,7 +84,7 @@ describe("Crop Routes - Full Coverage", () => {
         cropId: maizeCrop.id,
         plantingDate: "2024-01-01",
         harvestDate: "2024-05-01",
-        status: "plantend",
+        status: "planted",
       });
 
     expect(res.statusCode).toBe(404);
@@ -113,7 +113,7 @@ describe("Crop Routes - Full Coverage", () => {
         cropId: beansCrop.id,
         plantingDate: "2024-01-01",
         harvestDate: "2024-05-01",
-        status: "plantend",
+        status: "planted",
       });
 
     expect(res.statusCode).toBe(403);
@@ -144,7 +144,7 @@ describe("Crop Routes - Full Coverage", () => {
         cropId: 99999, // Non-existent crop ID
         plantingDate: "2024-01-01",
         harvestDate: "2024-05-01",
-        status: "plantend",
+        status: "planted",
       });
 
     expect(res.statusCode).toBe(404);
@@ -159,7 +159,7 @@ describe("Crop Routes - Full Coverage", () => {
         cropId: maizeCrop.id,
         plantingDate: "2024-01-01",
         harvestDate: "2024-05-01",
-        status: "plantend",
+        status: "planted",
       });
 
     expect(res.statusCode).toBe(201);
@@ -340,7 +340,7 @@ describe("Crop Routes - Full Coverage", () => {
         cropId: beansCrop.id,
         plantingDate: new Date(),
         harvestDate: new Date(),
-        status: "plantend",
+        status: "planted",
         farmId: farm2.id,
       },
     });
@@ -359,7 +359,7 @@ describe("Crop Routes - Full Coverage", () => {
         cropId: maizeCrop.id,
         plantingDate: new Date("2024-03-01"),
         harvestDate: new Date("2024-07-01"),
-        status: "plantend",
+        status: "planted",
         farmId: farm.id,
       },
     });
