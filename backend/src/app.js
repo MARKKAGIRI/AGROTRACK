@@ -19,6 +19,7 @@ app.use('/api/expenses', require('./routes/expenseRoutes'));
 app.use('/api/revenues', require('./routes/revenueRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/weather', require('./routes/weatherRoutes'));
+app.use("/api/crops", require("./routes/cropRoutes"));
 
 // Test Route
 app.get('/api/test', (req, res) => {
