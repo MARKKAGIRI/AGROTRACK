@@ -13,6 +13,7 @@ import FarmDetailsScreen from "../screens/Home/FarmDetailsScreen";
 import PrivacyScreen from "../screens/Profile/Privacy";
 import HelpSupport from "../screens/Profile/HelpSupport";
 import About from "../screens/Profile/About";
+import CropCycleScreen from "../screens/Lifecycle/CropCycle";
 
 const Stack = createNativeStackNavigator();
 
@@ -130,6 +131,15 @@ export default function MainAppStack() {
           },
         }}
       />
+
+      <Stack.Screen
+        name="CropCycle"
+        component={CropCycleScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      
       <Stack.Screen
         name="Privacy"
         component={PrivacyScreen}

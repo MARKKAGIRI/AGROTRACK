@@ -7,7 +7,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 import HomeScreen from "../screens/Home/HomeScreen";
 import Analytics from "../screens/Analytics/Analytics";
-import LifeCycle from "../screens/Lifecycle/LifeCycle";
 import Profile from "../screens/Profile/Profile";
 
 

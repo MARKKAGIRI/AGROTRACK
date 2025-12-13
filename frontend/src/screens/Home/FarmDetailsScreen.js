@@ -22,6 +22,7 @@ export default function FarmDetailsScreen() {
 
   const [farm, setFarm] = useState(null);
   const [crops, setCrops] = useState([]);
+  const [cropDetails, setCropDetails] = useState([])
   const [loading, setLoading] = useState(true);
   const [loadingCrops, setLoadingCrops] = useState(true);
 
@@ -204,7 +205,8 @@ export default function FarmDetailsScreen() {
              </View>
           ) : (
             crops.map((crop) => (
-              <TouchableOpacity key={crop.id} className="bg-white rounded-3xl p-4 mb-3 shadow-sm border border-gray-50">
+              <TouchableOpacity key={crop.id} className="bg-white rounded-3xl p-4 mb-3 shadow-sm border border-gray-50"
+              onPress={() => {navigation.navigate("CropCycle", { cropCycleId: crop.id, farmId: farmId })}}>
                 <View className="flex-row items-center">
                   {/* Icon Box */}
                   <View className="w-12 h-12 bg-green-50 rounded-2xl items-center justify-center mr-4">
@@ -214,7 +216,7 @@ export default function FarmDetailsScreen() {
                   {/* Info */}
                   <View className="flex-1">
                     <View className="flex-row justify-between items-center mb-1">
-                      <Text className="text-base font-bold text-gray-800">{crop.crop?.name || 'Crop'}</Text>
+                      <Text className="text-base font-bold text-gray-800">{crop.crop?.cropName || 'Crop'}</Text>
                       <View className={`px-2 py-0.5 rounded-full ${getStatusColor(crop.status)}`}>
                          <Text className="text-[10px] font-bold uppercase">{crop.status}</Text>
                       </View>

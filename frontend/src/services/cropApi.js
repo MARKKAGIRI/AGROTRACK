@@ -30,23 +30,25 @@ export const getAllCrops = async (token) => {
   }
 };
 
-// Get all crops for a farm
-export const getCropsByFarm = async (farmId) => {
-  try {
-    const response = await api.get(`/cropCycle/0d5bdfe5-d7b9-4b2a-94e9-8e165627307c/crops`);
-    return response.data;
-  } catch (error) {
-    console.log(error)
-    throw error.response?.data || error.message;
+export const getCropCycleById = async (farmId, cropCycleId, token) => {
+  try{
+    const res = await api.get(`/cropCycle/${farmId}/crops/${cropCycleId}`, {
+      headers: { Authorization: `Bearer ${token}`}
+    });
+    if (res.data.success){
+      return res.data.cropCycle
+    }else {
+      return []
+    }
+  }catch (error){
+    console.error("Failed to fetch cropcycle", error);
+    return []
   }
-};
-
+}
 
 // Add a new crop cycle
 export const addCropCycle = async (farmId, data, token) => {
   try {
-    console.log("Data:", farmId);
-
     const res = await api.post(
       `/cropCycle/${farmId}/crops`, // endpoint
       data, // request body

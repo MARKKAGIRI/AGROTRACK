@@ -7,6 +7,7 @@ import {
   Alert,
   Modal,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -30,11 +31,16 @@ export default function AddCropCycleScreen() {
   const [showPlantingPicker, setShowPlantingPicker] = useState(false);
   const [showHarvestPicker, setShowHarvestPicker] = useState(false);
 
+  const [loadingCrops, setLoadingCrops] = useState(false);
+  const [addingCropCycle, setAddingCropCycle] = useState(false);
+
   // Load crops on mount
   useEffect(() => {
     const loadCrops = async () => {
+      setLoadingCrops(true);
       const res = await getAllCrops(token);
       if (res.success) setCropList(res.crops);
+      setLoadingCrops(false);
     };
     loadCrops();
   }, []);
@@ -45,6 +51,8 @@ export default function AddCropCycleScreen() {
       return;
     }
 
+    setAddingCropCycle(true);
+
     const payload = {
       cropId: selectedCrop.id,
       plantingDate,
@@ -53,6 +61,8 @@ export default function AddCropCycleScreen() {
     };
 
     const res = await addCropCycle(farmId, payload, token);
+
+    setAddingCropCycle(false);
 
     if (res.success) {
       Alert.alert("Success", "Crop cycle added successfully!", [
@@ -90,36 +100,38 @@ export default function AddCropCycleScreen() {
       </TouchableOpacity>
 
       {/* Crop Modal */}
-      <Modal
-        visible={cropModalVisible}
-        animationType="slide"
-        transparent={true}
-      >
+      <Modal visible={cropModalVisible} animationType="slide" transparent={true}>
         <View className="flex-1 justify-center bg-black/30 p-5">
           <View className="bg-white rounded-xl p-5 max-h-[80%]">
             <Text className="text-lg font-bold mb-4">Select a Crop</Text>
-            <FlatList
-              data={cropList}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  className={`p-3 rounded-xl mb-2 ${
-                    selectedCrop?.id === item.id
-                      ? "bg-green-100"
-                      : "bg-gray-50"
-                  }`}
-                  onPress={() => {
-                    setSelectedCrop(item);
-                    setCropModalVisible(false);
-                  }}
-                >
-                  <Text className="text-gray-800 font-semibold">
-                    {item.cropName}
-                  </Text>
-                  <Text className="text-gray-400 text-xs">{item.cropType}</Text>
-                </TouchableOpacity>
-              )}
-            />
+
+            {loadingCrops ? (
+              <View className="flex-1 justify-center items-center py-10">
+                <ActivityIndicator size="large" color="#16a34a" />
+              </View>
+            ) : (
+              <FlatList
+                data={cropList}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    className={`p-3 rounded-xl mb-2 ${
+                      selectedCrop?.id === item.id
+                        ? "bg-green-100"
+                        : "bg-gray-50"
+                    }`}
+                    onPress={() => {
+                      setSelectedCrop(item);
+                      setCropModalVisible(false);
+                    }}
+                  >
+                    <Text className="text-gray-800 font-semibold">{item.cropName}</Text>
+                    <Text className="text-gray-400 text-xs">{item.cropType}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+
             <TouchableOpacity
               onPress={() => setCropModalVisible(false)}
               className="mt-3 bg-gray-200 py-2 rounded-xl items-center"
@@ -153,9 +165,7 @@ export default function AddCropCycleScreen() {
 
       {/* Harvest Date */}
       <View className="mt-5">
-        <Text className="text-gray-600 mb-2">
-          Expected Harvest Date (Optional)
-        </Text>
+        <Text className="text-gray-600 mb-2">Expected Harvest Date (Optional)</Text>
         <TouchableOpacity
           onPress={() => setShowHarvestPicker(true)}
           className="bg-white px-4 py-3 rounded-xl border border-gray-200"
@@ -179,9 +189,16 @@ export default function AddCropCycleScreen() {
       {/* Submit Button */}
       <TouchableOpacity
         onPress={handleSubmit}
-        className="mt-10 bg-green-600 py-4 rounded-2xl items-center"
+        disabled={addingCropCycle}
+        className={`mt-10 py-4 rounded-2xl items-center ${
+          addingCropCycle ? "bg-green-400" : "bg-green-600"
+        }`}
       >
-        <Text className="text-white font-bold">Add Crop Cycle</Text>
+        {addingCropCycle ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text className="text-white font-bold">Add Crop Cycle</Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
