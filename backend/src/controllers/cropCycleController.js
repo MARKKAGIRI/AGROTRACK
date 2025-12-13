@@ -49,6 +49,72 @@ const getCrops = async (req, res) => {
   }
 };
 
+// Controller to get a single crop cycle by ID
+const getCropCycleById = async (req, res) => {
+  try {
+    const { farmId, cropCycleId } = req.params
+    const userId = req.user.user_id
+
+    // 1. Check farm ownership
+    const farm = await prisma.farm.findUnique({
+      where: { id: farmId },
+    })
+
+    if (!farm) {
+      return res.status(404).json({
+        success: false,
+        message: "Farm not found",
+      })
+    }
+
+    if (farm.ownerId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access to this farm",
+      })
+    }
+
+    // 2. Get crop cycle with associated data
+    const cropCycle = await prisma.cropCycle.findUnique({
+      where: { id: cropCycleId },
+      include: {
+        crop: true,      // includes growthData
+        tasks: true,
+        expenses: true,
+        revenues: true,
+      },
+    })
+
+    if (!cropCycle) {
+      return res.status(404).json({
+        success: false,
+        message: "Crop cycle not found",
+      })
+    }
+
+    // 3. Ensure cycle belongs to this farm
+    if (cropCycle.farmId !== farmId) {
+      return res.status(400).json({
+        success: false,
+        message: "Crop cycle does not belong to this farm",
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      cropCycle,
+    })
+  } catch (error) {
+    console.error("Get crop cycle error:", error)
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    })
+  }
+}
+
+
 // Controller to add a new crop cycle
 const addCrop = async (req, res) => {
   // Validate request body
@@ -252,6 +318,7 @@ const deleteCrop = async (req, res) => {
 
 module.exports = {
   getCrops,
+  getCropCycleById,
   addCrop,
   updateCrop,
   deleteCrop,
