@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  role     String   @default("user")
+  location String?
+  advice   Advice[]
+  farms    Farm[]
+}
+
+model Farm {
+  id         String      @id @default(uuid())
+  name       String
+  size       Float?
+  unit       String? // Acres or Hectares
+  type       String? // Crop Farm, Livestock, Mixed, etc.
+  location   String
+  crops      Json? // Array of crop names
+  notes      String? // Optional notes
+  ownerId    String
+  cropType   String? // optional
+  cropCycles CropCycle[] @relation("FarmCrops") // corrected relation
+  owner      User        @relation(fields: [ownerId], references: [id])
+  createdAt  DateTime    @default(now())
+}
+
+model CropCycle {
+  id           String    @id @default(uuid())
+  cropName     String
+  plantingDate DateTime
+  harvestDate  DateTime?
+  status       String
+  farmId       String
+  farm         Farm      @relation("FarmCrops", fields: [farmId], references: [id]) // relation name matches Farm
+  tasks        Task[]
+}
+
+model Crops {
+  id         Int      @id @default(autoincrement())
+  cropName   String   @unique
+  cropType   String
+  region     String
+  growthData Json
+  createdAt  DateTime @default(now())
+}
+
+model Task {
+  id      String    @id @default(uuid())
+  title   String
+  dueDate DateTime
+  status  String
+  cropId  String
+  crop    CropCycle @relation(fields: [cropId], references: [id])
+}
+
+model Advice {
+  id        String   @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
