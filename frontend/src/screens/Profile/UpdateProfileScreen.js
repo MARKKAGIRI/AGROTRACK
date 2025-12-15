@@ -22,18 +22,7 @@ export default function UpdateProfileScreen() {
     <SafeAreaView className="flex-1 bg-green-50">
       <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
 
-      {/* Header */}
-      <View className="bg-green-600 px-5 pt-4 pb-3">
-        <View className="flex-row items-center justify-between mb-6">
-          <TouchableOpacity className="w-10 h-10 items-center justify-center"
-           onPress={() =>{navigation.goBack()} 
-          }>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-white">Edit Profile</Text>
-          <View className="w-10" />
-        </View>
-      </View>
+      
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Picture Section */}

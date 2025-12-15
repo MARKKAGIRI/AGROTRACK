@@ -14,6 +14,7 @@ import PrivacyScreen from "../screens/Profile/Privacy";
 import HelpSupport from "../screens/Profile/HelpSupport";
 import About from "../screens/Profile/About";
 import CropCycleScreen from "../screens/Lifecycle/CropCycle";
+import AnalyticsScreen from "../screens/Analytics/Analytics";
 
 const Stack = createNativeStackNavigator();
 
@@ -37,10 +38,10 @@ export default function MainAppStack() {
       />
 
       <Stack.Screen
-        name="AllFarms"
-        component={AllFarmsScreen}
+        name="Analytics"
+        component={AnalyticsScreen}
         options={{
-          title: "Add Crops",
+          title: "Analytics",
           headerBackTitleVisible: false,
           headerTintColor: "#fff",
           headerStyle: {
@@ -94,7 +95,12 @@ export default function MainAppStack() {
         name="UpdateProfile"
         component={UpdateProfileScreen}
         options={{
-          headerShown: false,
+          title: "Edit Profile",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+          backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
 
@@ -102,7 +108,12 @@ export default function MainAppStack() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          headerShown: false,
+          title: "Settings",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
 
@@ -123,7 +134,7 @@ export default function MainAppStack() {
         name="FarmDetails"
         component={FarmDetailsScreen}
         options={{
-          title: "My Farms",
+          title: "",
           headerBackTitleVisible: false,
           headerTintColor: "#fff",
           headerStyle: {
@@ -144,21 +155,36 @@ export default function MainAppStack() {
         name="Privacy"
         component={PrivacyScreen}
         options={{
-          headerShown: false,
+          title: "Privacy & Security",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
       <Stack.Screen
         name="Help"
         component={HelpSupport}
         options={{
-          headerShown: false,
+          title: "Help & Support",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
       <Stack.Screen
         name="About"
         component={About}
         options={{
-          headerShown: false,
+          title: "About",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", // optional
+          },
         }}
       />
     </Stack.Navigator>

@@ -1,243 +1,341 @@
-import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, SafeAreaView } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import React, { useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
 
 const AnalyticsScreen = () => {
-  const plantData = [
+  const [selectedPeriod, setSelectedPeriod] = useState("month");
+
+  // Financial Analytics from Revenue and Expense models
+  const financialData = {
+    totalRevenue: 456800,
+    totalExpenses: 283400,
+    netProfit: 173400,
+    profitMargin: 38,
+    revenueGrowth: 12.5,
+    expensesByType: [
+      { type: "Seeds & Fertilizer", amount: 85000, percentage: 30 },
+      { type: "Labor", amount: 120000, percentage: 42 },
+      { type: "Equipment", amount: 48400, percentage: 17 },
+      { type: "Utilities", amount: 30000, percentage: 11 }
+    ]
+  };
+
+  // Farm Performance from Farm model
+  const farmStats = {
+    totalFarms: 3,
+    totalArea: 45.5,
+    activeCropCycles: 12,
+    completedCropCycles: 8,
+    farms: [
+      { name: "North Field", size: 20.5, unit: "acres", activeCrops: 5, revenue: 220000 },
+      { name: "South Valley", size: 15.0, unit: "acres", activeCrops: 4, revenue: 156800 },
+      { name: "East Garden", size: 10.0, unit: "acres", activeCrops: 3, revenue: 80000 }
+    ]
+  };
+
+  // Crop Cycle Analytics from CropCycle, Crops, Revenue, and Expense models
+  const cropCycleData = [
     {
-      name: "Tomatoes",
-      icon: "🍅",
+      cropName: "Tomatoes",
+      status: "growing",
+      cycles: 3,
       planted: 12,
-      growing: 8,
-      harvested: 4,
-      progress: 75,
-      progressColor: "#22c55e"
+      harvested: 8,
+      revenue: 125000,
+      expenses: 62000,
+      profit: 63000,
+      profitMargin: 50,
+      successRate: 85,
+      avgGrowthDays: 75,
+      progressColor: "bg-green-600"
     },
     {
-      name: "Lettuce",
-      icon: "🥬",
+      cropName: "Lettuce",
+      status: "growing",
+      cycles: 2,
       planted: 8,
-      growing: 6,
-      harvested: 2,
-      progress: 60,
-      progressColor: "#22c55e"
+      harvested: 6,
+      revenue: 48000,
+      expenses: 24000,
+      profit: 24000,
+      profitMargin: 50,
+      successRate: 90,
+      avgGrowthDays: 45,
+      progressColor: "bg-green-600"
     },
     {
-      name: "Carrots",
-      icon: "🥕",
+      cropName: "Carrots",
+      status: "planted",
+      cycles: 2,
       planted: 15,
-      growing: 12,
-      harvested: 3,
-      progress: 45,
-      progressColor: "#f59e0b"
+      harvested: 10,
+      revenue: 72000,
+      expenses: 45000,
+      profit: 27000,
+      profitMargin: 38,
+      successRate: 75,
+      avgGrowthDays: 60,
+      progressColor: "bg-amber-500"
     },
     {
-      name: "Herbs",
-      icon: "🌿",
-      planted: 6,
-      growing: 5,
-      harvested: 1,
-      progress: 85,
-      progressColor: "#22c55e"
-    },
-    {
-      name: "Peppers",
-      icon: "🌶️",
+      cropName: "Peppers",
+      status: "harvested",
+      cycles: 2,
       planted: 10,
-      growing: 7,
-      harvested: 3,
-      progress: 65,
-      progressColor: "#22c55e"
+      harvested: 10,
+      revenue: 89000,
+      expenses: 52000,
+      profit: 37000,
+      profitMargin: 42,
+      successRate: 88,
+      avgGrowthDays: 80,
+      progressColor: "bg-green-600"
     },
     {
-      name: "Spinach",
-      icon: "🥬",
+      cropName: "Spinach",
+      status: "growing",
+      cycles: 3,
       planted: 20,
-      growing: 15,
-      harvested: 5,
-      progress: 55,
-      progressColor: "#f59e0b"
-    },
-    {
-      name: "Cucumbers",
-      icon: "🥒",
-      planted: 8,
-      growing: 6,
-      harvested: 2,
-      progress: 70,
-      progressColor: "#22c55e"
-    },
-    {
-      name: "Radishes",
-      icon: "🌶️",
-      planted: 25,
-      growing: 18,
-      harvested: 7,
-      progress: 80,
-      progressColor: "#22c55e"
-    },
-    {
-      name: "Kale",
-      icon: "🥬",
-      planted: 12,
-      growing: 10,
-      harvested: 2,
-      progress: 40,
-      progressColor: "#f59e0b"
-    },
-    {
-      name: "Broccoli",
-      icon: "🥦",
-      planted: 4,
-      growing: 2,
-      harvested: 2,
-      progress: 30,
-      progressColor: "#ef4444"
+      harvested: 15,
+      revenue: 62800,
+      expenses: 38000,
+      profit: 24800,
+      profitMargin: 39,
+      successRate: 80,
+      avgGrowthDays: 50,
+      progressColor: "bg-green-600"
     }
   ];
 
-  const totalPlants = plantData.reduce((sum, plant) => sum + plant.planted, 0);
-  const readyToHarvest = 30;
+  // Task Stats from Task model
+  const taskStats = {
+    pending: 8,
+    completed: 24,
+    overdue: 2,
+    completionRate: 75,
+    unreadNotifications: 5
+  };
 
-  const ProgressBar = ({ progress, color = "#22c55e" }) => (
-    <View style={{ width: '100%', height: 8, backgroundColor: '#e5e7eb', borderRadius: 4 }}>
+  // Weather Analytics from WeatherLog model
+  const weatherData = {
+    avgTemp: 24.5,
+    avgHumidity: 65,
+    totalRainfall: 45.2,
+    avgWindSpeed: 12.3,
+    optimalDays: 22,
+    warningDays: 3
+  };
+
+  const formatKES = (amount) => {
+    if (amount >= 1000000) {
+      return `KES ${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `KES ${(amount / 1000).toFixed(0)}k`;
+    }
+    return `KES ${amount.toLocaleString()}`;
+  };
+
+  const ProgressBar = ({ progress, colorClass = "bg-green-600" }) => (
+    <View className="w-full h-2 bg-gray-200 rounded">
       <View 
-        style={{ 
-          width: `${progress}%`, 
-          height: 8,
-          backgroundColor: color,
-          borderRadius: 4
-        }} 
+        className={`h-2 rounded ${colorClass}`}
+        style={{ width: `${Math.min(progress, 100)}%` }}
       />
     </View>
   );
 
-  const PlantCard = ({ plant }) => (
-    <View 
-      style={{
-        backgroundColor: 'white',
-        borderRadius: 12,
-        marginHorizontal: 20,
-        marginBottom: 12,
-        padding: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5,
-      }}
-    >
-      {/* Header Row */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View 
-            style={{ 
-              width: 40, 
-              height: 40, 
-              backgroundColor: '#fef2f2', 
-              borderRadius: 20, 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              marginRight: 12
-            }}
-          >
-            <Text style={{ fontSize: 20 }}>{plant.icon}</Text>
-          </View>
-          <Text style={{ fontSize: 16, fontWeight: '600', color: '#1f2937' }}>{plant.name}</Text>
+  const MetricCard = ({ title, value, subtitle, textColor = "text-green-600", trend }) => (
+    <View className="bg-white rounded-xl p-4 flex-1 mx-1 shadow-md">
+      <Text className={`text-3xl font-bold mb-1 ${textColor}`}>{value}</Text>
+      <Text className="text-xs text-gray-600 mb-1">{title}</Text>
+      {subtitle && <Text className="text-xs text-gray-400">{subtitle}</Text>}
+      {trend && (
+        <View className="flex-row items-center mt-2">
+          <Text className={`text-xs font-semibold ${trend > 0 ? "text-green-600" : "text-red-600"}`}>
+            {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}%
+          </Text>
         </View>
-        <TouchableOpacity 
-          style={{ 
-            width: 30, 
-            height: 30, 
-            backgroundColor: '#f3f4f6', 
-            borderRadius: 15, 
-            alignItems: 'center', 
-            justifyContent: 'center' 
-          }}
-        >
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#6b7280' }}>+</Text>
-        </TouchableOpacity>
-      </View>
-      
-      {/* Numbers Row */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#16a34a', marginBottom: 4 }}>{plant.planted}</Text>
-          <Text style={{ fontSize: 12, color: '#6b7280' }}>Planted</Text>
-        </View>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#ea580c', marginBottom: 4 }}>{plant.growing}</Text>
-          <Text style={{ fontSize: 12, color: '#6b7280' }}>Growing</Text>
-        </View>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#16a34a', marginBottom: 4 }}>{plant.harvested}</Text>
-          <Text style={{ fontSize: 12, color: '#6b7280' }}>Harvested</Text>
-        </View>
-      </View>
-      
-      {/* Progress Section */}
-      <View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <Text style={{ fontSize: 14, color: '#6b7280' }}>Growth Progress</Text>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#1f2937' }}>{plant.progress}%</Text>
-        </View>
-        <ProgressBar progress={plant.progress} color={plant.progressColor} />
-      </View>
+      )}
     </View>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }}>
-
+    <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView 
-        style={{ flex: 1 }} 
+        className="flex-1"
         showsVerticalScrollIndicator={true}
-        contentContainerStyle={{ paddingBottom: 20, paddingTop: 40 }}
+        contentContainerStyle={{ paddingBottom: 20, paddingTop: 20 }}
       >
-        {/* Plant Performance Section */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ fontSize: 18, marginRight: 8 }}>📈</Text>
-            <Text style={{ fontSize: 18, fontWeight: '600', color: '#1f2937' }}>Plant Performance</Text>
+       
+        {/* Period Selector */}
+        <View className="flex-row px-5 mb-5">
+          {["week", "month", "year"].map((period) => (
+            <TouchableOpacity
+              key={period}
+              onPress={() => setSelectedPeriod(period)}
+              className={`py-2 px-4 rounded-full mr-2 ${
+                selectedPeriod === period ? "bg-green-600" : "bg-gray-200"
+              }`}
+            >
+              <Text className={`font-semibold capitalize ${
+                selectedPeriod === period ? "text-white" : "text-gray-700"
+              }`}>
+                {period}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Financial Overview */}
+        <View className="px-5 mb-6">
+          <View className="flex-row items-center mb-4">
+            <Text className="text-lg font-semibold text-gray-900">Financial Overview</Text>
           </View>
           
-          {/* Season Summary Card */}
-          <View style={{ backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', borderWidth: 1, borderRadius: 16, padding: 16 }}>
-            <Text style={{ color: '#1f2937', fontWeight: '600', marginBottom: 16, fontSize: 16 }}>Season Summary</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View>
-                <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#16a34a', marginBottom: 4 }}>{totalPlants}</Text>
-                <Text style={{ color: '#4b5563', fontSize: 14 }}>Total Plants</Text>
+          <View className="flex-row mb-3">
+            <MetricCard 
+              title="Total Revenue" 
+              value={formatKES(financialData.totalRevenue)} 
+              textColor="text-green-600" 
+              trend={financialData.revenueGrowth} 
+            />
+            <MetricCard 
+              title="Net Profit" 
+              value={formatKES(financialData.netProfit)} 
+              textColor="text-green-600" 
+              subtitle={`${financialData.profitMargin}% margin`} 
+            />
+          </View>
+
+          <View className="bg-white rounded-xl p-4 shadow-md">
+            <Text className="text-sm font-semibold text-gray-900 mb-3">Expenses Breakdown</Text>
+            {financialData.expensesByType.map((expense, idx) => (
+              <View key={idx} className="mb-3">
+                <View className="flex-row justify-between mb-2">
+                  <Text className="text-sm text-gray-700">{expense.type}</Text>
+                  <Text className="text-sm font-semibold text-gray-900">{formatKES(expense.amount)}</Text>
+                </View>
+                <ProgressBar progress={expense.percentage} colorClass="bg-amber-500" />
               </View>
-              <View>
-                <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#16a34a', marginBottom: 4 }}>{readyToHarvest}</Text>
-                <Text style={{ color: '#4b5563', fontSize: 14 }}>Ready to Harvest</Text>
+            ))}
+          </View>
+        </View>
+
+        {/* Farm Performance */}
+        <View className="px-5 mb-6">
+          <View className="flex-row items-center mb-4">
+            <Text className="text-lg font-semibold text-gray-900">Farm Performance</Text>
+          </View>
+
+          <View className="flex-row mb-3">
+            <MetricCard 
+              title="Total Farms" 
+              value={farmStats.totalFarms} 
+              textColor="text-green-600" 
+              subtitle={`${farmStats.totalArea} acres total`} 
+            />
+            <MetricCard 
+              title="Active Cycles" 
+              value={farmStats.activeCropCycles} 
+              textColor="text-orange-600" 
+              subtitle={`${farmStats.completedCropCycles} completed`} 
+            />
+          </View>
+
+          {farmStats.farms.map((farm, idx) => (
+            <View key={idx} className="bg-white rounded-xl p-4 mb-3 shadow-md">
+              <View className="flex-row justify-between">
+                <View>
+                  <Text className="text-base font-semibold text-gray-900">{farm.name}</Text>
+                  <Text className="text-xs text-gray-600 mt-0.5">{farm.size} {farm.unit}</Text>
+                </View>
+                <View className="items-end">
+                  <Text className="text-lg font-bold text-green-600">{formatKES(farm.revenue)}</Text>
+                  <Text className="text-xs text-gray-600 mt-0.5">{farm.activeCrops} active crops</Text>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Crop Cycle Analytics */}
+        <View className="px-5 mb-6">
+          <View className="flex-row items-center mb-4">
+            <Text className="text-lg font-semibold text-gray-900">Crop Performance</Text>
+          </View>
+
+          {cropCycleData.map((crop, idx) => (
+            <View key={idx} className="bg-white rounded-xl p-4 mb-3 shadow-md">
+              <View className="flex-row justify-between mb-4">
+                <View className="flex-row items-center">
+                  <View>
+                    <Text className="text-base font-semibold text-gray-900">{crop.cropName}</Text>
+                    <Text className="text-xs text-gray-600">{crop.cycles} cycles • {crop.avgGrowthDays} days avg</Text>
+                  </View>
+                </View>
+                <View className={`px-2.5 py-1 rounded-xl ${
+                  crop.status === "growing" ? "bg-yellow-100" : 
+                  crop.status === "harvested" ? "bg-green-100" : "bg-red-100"
+                }`}>
+                  <Text className={`text-xs font-semibold capitalize ${
+                    crop.status === "growing" ? "text-yellow-900" : 
+                    crop.status === "harvested" ? "text-green-900" : "text-red-900"
+                  }`}>{crop.status}</Text>
+                </View>
+              </View>
+
+              <View className="flex-row justify-between mb-4">
+                <View>
+                  <Text className="text-xl font-bold text-green-600">{formatKES(crop.profit)}</Text>
+                  <Text className="text-xs text-gray-600">Net Profit</Text>
+                </View>
+                <View>
+                  <Text className="text-xl font-bold text-gray-900">{crop.profitMargin}%</Text>
+                  <Text className="text-xs text-gray-600">Margin</Text>
+                </View>
+                <View>
+                  <Text className="text-xl font-bold text-orange-600">{crop.successRate}%</Text>
+                  <Text className="text-xs text-gray-600">Success Rate</Text>
+                </View>
+              </View>
+
+              <View className="flex-row justify-between pt-3 border-t border-gray-200">
+                <Text className="text-xs text-gray-600">
+                  Revenue: <Text className="font-semibold text-green-600">{formatKES(crop.revenue)}</Text>
+                </Text>
+                <Text className="text-xs text-gray-600">
+                  Expenses: <Text className="font-semibold text-red-600">{formatKES(crop.expenses)}</Text>
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Tasks & Weather */}
+        <View className="px-5 mb-6">
+          <View className="flex-row mb-3">
+            <View className="flex-1 mr-1.5">
+              <View className="bg-white rounded-xl p-4 shadow-md">
+                <Text className="text-sm font-semibold text-gray-900 mb-2">Tasks</Text>
+                <Text className="text-2xl font-bold text-orange-600 mb-1">{taskStats.pending}</Text>
+                <Text className="text-xs text-gray-600 mb-2">Pending</Text>
+                <ProgressBar progress={taskStats.completionRate} colorClass="bg-green-600" />
+                <Text className="text-xs text-gray-600 mt-1">{taskStats.completionRate}% completion rate</Text>
+              </View>
+            </View>
+            <View className="flex-1 ml-1.5">
+              <View className="bg-white rounded-xl p-4 shadow-md">
+                <Text className="text-sm font-semibold text-gray-900 mb-2">Weather</Text>
+                <Text className="text-2xl font-bold text-green-600 mb-1">{weatherData.avgTemp}°C</Text>
+                <Text className="text-xs text-gray-600 mb-1">Avg Temperature</Text>
+                <Text className="text-xs text-gray-600">{weatherData.totalRainfall}mm rainfall</Text>
+                <Text className="text-xs text-gray-600">{weatherData.avgHumidity}% humidity</Text>
               </View>
             </View>
           </View>
         </View>
-
-        {/* Plant Cards */}
-        <View style={{ paddingTop: 8 }}>
-          {plantData.map((plant, index) => (
-            <PlantCard key={index} plant={plant} />
-          ))}
-        </View>
       </ScrollView>
-
-
     </SafeAreaView>
   );
 };
 
 export default AnalyticsScreen;
-
-// const Analytics = () => {
-//   return (
-//     <View className="flex-1 justify-center items-center">
-//       <Text className="text-lg font-bold">Analytics</Text>
-//     </View>
-//   )
-// }
-
-// export default Analytics

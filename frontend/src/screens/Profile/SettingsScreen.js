@@ -53,35 +53,8 @@ export default function SettingsScreen() {
     <SafeAreaView className="flex-1 bg-green-50">
       <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
 
-      {/* Header */}
-      <View className="bg-green-600 px-5 pt-4 pb-6 rounded-b-3xl">
-        <View className="flex-row items-center justify-between mb-4">
-          <TouchableOpacity className="w-10 h-10 items-center justify-center"
-           onPress={() => {navigation.goBack()}}>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-white">Settings</Text>
-          <View className="w-10" />
-        </View>
-      </View>
-
       <ScrollView className="flex-1 px-5 pt-6" showsVerticalScrollIndicator={false}>
-        {/* Account Section */}
-        <SettingsSection title="Account">
-          <SettingsItem
-            icon="lock-closed-outline"
-            title="Change Password"
-            subtitle="Update your password"
-            onPress={() => {}}
-          />
-          <SettingsItem
-            icon="shield-checkmark-outline"
-            title="Privacy & Security"
-            subtitle="Manage your privacy settings"
-            onPress={() => {}}
-          />
-        </SettingsSection>
-
+       
         {/* Notifications Section */}
         <SettingsSection title="Notifications">
           <View className="bg-white rounded-2xl p-4 mb-3 shadow-sm">

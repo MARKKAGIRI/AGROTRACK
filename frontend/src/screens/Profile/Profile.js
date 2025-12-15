@@ -83,9 +83,8 @@ const Profile = () => {
         {/* Profile Header */}
         <View className="items-center mb-5 bg-gradient-to-br from-[#d0e8d6] to-[#e8f5e9] p-6 rounded-2xl w-full shadow-sm">
           <View className="relative">
-            <Image
-              source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
-              className="w-24 h-24 rounded-full border-4 border-[#388e3c] mb-3"
+            <View
+              className="w-24 h-24 rounded-full border-4 bg-[#388e3c] mb-3"
             />
             <TouchableOpacity className="absolute bottom-2 right-0 bg-[#388e3c] w-8 h-8 rounded-full items-center justify-center border-2 border-white">
               <Icon name="camera" size={16} color="#fff" />
@@ -97,10 +96,7 @@ const Profile = () => {
           <Text className="text-base text-[#388e3c] font-medium mb-3">
             Farmer
           </Text>
-          <View className="flex-row items-center bg-white/60 px-4 py-2 rounded-full">
-            <Icon name="medal" size={18} color="#fbbf24" />
-            <Text className="text-sm text-[#666] ml-2 font-medium">Premium Member</Text>
-          </View>
+          
         </View>
 
         {/* Contact Info Card */}
