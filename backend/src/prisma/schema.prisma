@@ -8,7 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model stays mostly the same
+// User model
 model User {
   id            String         @id @default(uuid())
   name          String
@@ -23,7 +23,7 @@ model User {
   notifications Notification[]
 }
 
-// Farm stores information about the farm
+// Farm model
 model Farm {
   id          String       @id @default(uuid())
   name        String
@@ -33,7 +33,6 @@ model Farm {
   location    String
   latitude    Float?
   longitude   Float?
-
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
@@ -46,18 +45,18 @@ model Farm {
   @@index([ownerId])
 }
 
-// CropCycle represents a single season for a crop on a farm
+// CropCycle model
 model CropCycle {
   id           String    @id @default(uuid())
   farmId       String
   farm         Farm      @relation("FarmCrops", fields: [farmId], references: [id])
 
   cropId       Int
-  crop         Crops     @relation(fields: [cropId], references: [id]) // links to static crop info
+  crop         Crops     @relation(fields: [cropId], references: [id])
 
   plantingDate DateTime
   harvestDate  DateTime?
-  status       String    @default("planted")  // planted | growing | harvested | failed
+  status       String    @default("planted")
 
   tasks        Task[]
   expenses     Expense[]
@@ -67,16 +66,24 @@ model CropCycle {
   updatedAt    DateTime @updatedAt
 }
 
-// Task is linked to a CropCycle
+// Task Model (Updated to fit Controller)
 model Task {
   id          String     @id @default(uuid())
   cropCycleId String
-  cropCycle   CropCycle  @relation(fields: [cropCycleId], references: [id])
+  cropCycle   CropCycle  @relation(fields: [cropCycleId], references: [id], onDelete: Cascade)
 
-  title       String
+  title       String     // e.g., "Fertilize Field"
+  type        String     // e.g., "Field Work", "Purchase", "Harvest"
   description String?
-  status      String     @default("pending")   // pending | done
+  date        DateTime   // Due date or Completion date
+  status      String     @default("pending") // pending | completed | missed
+  photoUrl    String?    // Optional photo proof
+
   createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([cropCycleId])
+  @@index([date])
 }
 
 // Static crop database
@@ -85,13 +92,13 @@ model Crops {
   cropName   String   @unique
   cropType   String
   region     String
-  growthData Json      // useful info like ideal temp, soil, watering
+  growthData Json
   createdAt  DateTime  @default(now())
 
-  cropCycles CropCycle[] // back relation
+  cropCycles CropCycle[]
 }
 
-// Expenses for a crop season
+// Expenses
 model Expense {
   id          String    @id @default(uuid())
   cropCycleId String
@@ -109,7 +116,7 @@ model Expense {
   @@index([date])
 }
 
-// Revenue for a crop season
+// Revenue
 model Revenue {
   id          String    @id @default(uuid())
   cropCycleId String
@@ -134,7 +141,7 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   message   String
-  type      String   @default("info")  // info | alert | success
+  type      String   @default("info")
   read      Boolean  @default(false)
 
   createdAt DateTime @default(now())
@@ -144,7 +151,7 @@ model Notification {
   @@index([read])
 }
 
-// Weather logs for a farm
+// Weather logs
 model WeatherLog {
   id          String   @id @default(uuid())
   farmId      String
@@ -155,7 +162,6 @@ model WeatherLog {
   rainfall    Float
   windSpeed   Float
   description String?
-
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
 

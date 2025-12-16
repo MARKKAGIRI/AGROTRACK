@@ -4,18 +4,18 @@ const prisma = new PrismaClient();
 // Create new revenue record
 const createRevenue = async (req, res) => {
   try {
-    const { cropId, amount, quantity, buyerName, date } = req.body;
+    // FIXED: Expect 'cropCycleId' instead of 'cropId'
+    const { cropCycleId, amount, quantity, buyerName, date } = req.body;
     const userId = req.user.id;
 
     // Validate required fields
-    if (!cropId || !amount || !buyerName || !date) {
+    if (!cropCycleId || !amount || !buyerName || !date) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: cropId, amount, buyerName, date'
+        message: 'Missing required fields: cropCycleId, amount, buyerName, date'
       });
     }
 
-    // Validate amount
     if (isNaN(amount) || amount <= 0) {
       return res.status(400).json({
         success: false,
@@ -23,7 +23,6 @@ const createRevenue = async (req, res) => {
       });
     }
 
-    // Validate quantity if provided
     if (quantity && (isNaN(quantity) || quantity <= 0)) {
       return res.status(400).json({
         success: false,
@@ -31,42 +30,37 @@ const createRevenue = async (req, res) => {
       });
     }
 
-    // Verify crop belongs to user
-    const crop = await prisma.crop.findFirst({
+    // FIXED: Verify ownership via cropCycle -> farm -> ownerId
+    const cropCycle = await prisma.cropCycle.findFirst({
       where: {
-        id: cropId,
+        id: cropCycleId,
         farm: {
-          userId: userId
+          ownerId: userId
         }
       }
     });
 
-    if (!crop) {
+    if (!cropCycle) {
       return res.status(404).json({
         success: false,
-        message: 'Crop not found or access denied'
+        message: 'Crop Cycle not found or access denied'
       });
     }
 
     // Create revenue record
     const revenue = await prisma.revenue.create({
       data: {
-        cropId,
+        cropCycleId, // FIXED: Correct foreign key
         amount: parseFloat(amount),
         quantity: quantity ? parseFloat(quantity) : null,
         buyerName,
         date: new Date(date)
       },
       include: {
-        crop: {
-          select: {
-            name: true,
-            variety: true,
-            farm: {
-              select: {
-                name: true
-              }
-            }
+        cropCycle: {
+          include: {
+            crop: { select: { cropName: true, cropType: true } },
+            farm: { select: { name: true } }
           }
         }
       }
@@ -87,43 +81,40 @@ const createRevenue = async (req, res) => {
   }
 };
 
-// Get all revenues for a specific crop
+// Get all revenues for a specific crop cycle
 const getRevenuesByCrop = async (req, res) => {
   try {
+    // FIXED: Route param maps to cropCycleId
     const { cropId } = req.params;
+    const cropCycleId = cropId;
     const userId = req.user.id;
 
-    // Verify crop belongs to user
-    const crop = await prisma.crop.findFirst({
+    const cropCycle = await prisma.cropCycle.findFirst({
       where: {
-        id: cropId,
-        farm: {
-          userId: userId
-        }
+        id: cropCycleId,
+        farm: { ownerId: userId }
       }
     });
 
-    if (!crop) {
+    if (!cropCycle) {
       return res.status(404).json({
         success: false,
-        message: 'Crop not found or access denied'
+        message: 'Crop Cycle not found or access denied'
       });
     }
 
     const revenues = await prisma.revenue.findMany({
-      where: { cropId },
+      where: { cropCycleId },
       orderBy: { date: 'desc' },
       include: {
-        crop: {
-          select: {
-            name: true,
-            variety: true
+        cropCycle: {
+          include: {
+            crop: { select: { cropName: true } }
           }
         }
       }
     });
 
-    // Calculate totals
     const totalRevenue = revenues.reduce((sum, rev) => sum + rev.amount, 0);
     const totalQuantity = revenues.reduce((sum, rev) => sum + (rev.quantity || 0), 0);
 
@@ -131,8 +122,8 @@ const getRevenuesByCrop = async (req, res) => {
       success: true,
       data: revenues,
       count: revenues.length,
-      totalRevenue: totalRevenue,
-      totalQuantity: totalQuantity
+      totalRevenue,
+      totalQuantity
     });
   } catch (error) {
     console.error('Get revenues error:', error);
@@ -144,29 +135,26 @@ const getRevenuesByCrop = async (req, res) => {
   }
 };
 
-// Get all revenues for user (across all crops)
+// Get all revenues for user
 const getAllRevenues = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { startDate, endDate, cropId, buyerName } = req.query;
+    const { startDate, endDate, cropCycleId, buyerName } = req.query;
 
     const whereClause = {
-      crop: {
-        farm: {
-          userId: userId
-        }
+      cropCycle: {
+        farm: { ownerId: userId }
       }
     };
 
-    // Apply filters
     if (startDate || endDate) {
       whereClause.date = {};
       if (startDate) whereClause.date.gte = new Date(startDate);
       if (endDate) whereClause.date.lte = new Date(endDate);
     }
 
-    if (cropId) {
-      whereClause.cropId = cropId;
+    if (cropCycleId) {
+      whereClause.cropCycleId = cropCycleId;
     }
 
     if (buyerName) {
@@ -180,30 +168,22 @@ const getAllRevenues = async (req, res) => {
       where: whereClause,
       orderBy: { date: 'desc' },
       include: {
-        crop: {
-          select: {
-            name: true,
-            variety: true,
-            farm: {
-              select: {
-                name: true
-              }
-            }
+        cropCycle: {
+          include: {
+            crop: { select: { cropName: true } },
+            farm: { select: { name: true } }
           }
         }
       }
     });
 
-    // Calculate totals
     const totalRevenue = revenues.reduce((sum, rev) => sum + rev.amount, 0);
-    const totalQuantity = revenues.reduce((sum, rev) => sum + (rev.quantity || 0), 0);
 
     return res.status(200).json({
       success: true,
       data: revenues,
       count: revenues.length,
-      totalRevenue: totalRevenue,
-      totalQuantity: totalQuantity
+      totalRevenue
     });
   } catch (error) {
     console.error('Get all revenues error:', error);
@@ -215,42 +195,39 @@ const getAllRevenues = async (req, res) => {
   }
 };
 
-// Get profit/loss analysis for a crop
+// Get profit/loss analysis for a crop cycle
 const getProfitAnalysis = async (req, res) => {
   try {
     const { cropId } = req.params;
+    const cropCycleId = cropId;
     const userId = req.user.id;
 
-    // Verify crop belongs to user
-    const crop = await prisma.crop.findFirst({
+    // Verify ownership
+    const cropCycle = await prisma.cropCycle.findFirst({
       where: {
-        id: cropId,
-        farm: {
-          userId: userId
-        }
+        id: cropCycleId,
+        farm: { ownerId: userId }
       },
-      select: {
-        id: true,
-        name: true,
-        variety: true
+      include: {
+        crop: true
       }
     });
 
-    if (!crop) {
+    if (!cropCycle) {
       return res.status(404).json({
         success: false,
-        message: 'Crop not found or access denied'
+        message: 'Crop Cycle not found or access denied'
       });
     }
 
-    // Get all expenses for the crop
+    // Get all expenses for this cycle
     const expenses = await prisma.expense.findMany({
-      where: { cropId }
+      where: { cropCycleId }
     });
 
-    // Get all revenues for the crop
+    // Get all revenues for this cycle
     const revenues = await prisma.revenue.findMany({
-      where: { cropId }
+      where: { cropCycleId }
     });
 
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
@@ -261,10 +238,10 @@ const getProfitAnalysis = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
-        crop: crop,
-        totalExpenses: totalExpenses,
-        totalRevenue: totalRevenue,
-        profit: profit,
+        cropName: cropCycle.crop.cropName,
+        totalExpenses,
+        totalRevenue,
+        profit,
         profitMargin: `${profitMargin}%`,
         expenseCount: expenses.length,
         revenueCount: revenues.length
@@ -287,10 +264,8 @@ const getRevenueByBuyer = async (req, res) => {
     const { startDate, endDate } = req.query;
 
     const whereClause = {
-      crop: {
-        farm: {
-          userId: userId
-        }
+      cropCycle: {
+        farm: { ownerId: userId }
       }
     };
 
@@ -346,22 +321,14 @@ const getRevenueById = async (req, res) => {
     const revenue = await prisma.revenue.findFirst({
       where: {
         id,
-        crop: {
-          farm: {
-            userId: userId
-          }
+        cropCycle: {
+          farm: { ownerId: userId }
         }
       },
       include: {
-        crop: {
-          select: {
-            name: true,
-            variety: true,
-            farm: {
-              select: {
-                name: true
-              }
-            }
+        cropCycle: {
+          include: {
+            crop: { select: { cropName: true } }
           }
         }
       }
@@ -395,14 +362,11 @@ const updateRevenue = async (req, res) => {
     const userId = req.user.id;
     const { amount, quantity, buyerName, date } = req.body;
 
-    // Verify revenue belongs to user
     const existingRevenue = await prisma.revenue.findFirst({
       where: {
         id,
-        crop: {
-          farm: {
-            userId: userId
-          }
+        cropCycle: {
+          farm: { ownerId: userId }
         }
       }
     });
@@ -414,7 +378,6 @@ const updateRevenue = async (req, res) => {
       });
     }
 
-    // Validate amount if provided
     if (amount !== undefined && (isNaN(amount) || amount <= 0)) {
       return res.status(400).json({
         success: false,
@@ -422,7 +385,6 @@ const updateRevenue = async (req, res) => {
       });
     }
 
-    // Build update data
     const updateData = {};
     if (amount) updateData.amount = parseFloat(amount);
     if (quantity !== undefined) updateData.quantity = quantity ? parseFloat(quantity) : null;
@@ -431,14 +393,7 @@ const updateRevenue = async (req, res) => {
 
     const revenue = await prisma.revenue.update({
       where: { id },
-      data: updateData,
-      include: {
-        crop: {
-          select: {
-            name: true
-          }
-        }
-      }
+      data: updateData
     });
 
     return res.status(200).json({
@@ -462,14 +417,11 @@ const deleteRevenue = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Verify revenue belongs to user
     const existingRevenue = await prisma.revenue.findFirst({
       where: {
         id,
-        crop: {
-          farm: {
-            userId: userId
-          }
+        cropCycle: {
+          farm: { ownerId: userId }
         }
       }
     });
@@ -499,7 +451,6 @@ const deleteRevenue = async (req, res) => {
   }
 };
 
-
 module.exports = {
     createRevenue,
     getAllRevenues,
@@ -509,4 +460,4 @@ module.exports = {
     getRevenuesByCrop,
     updateRevenue,
     deleteRevenue
-}
+};

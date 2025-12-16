@@ -14,6 +14,10 @@ afterEach(async () => {
  
     
   const deleteTransactions = [
+    prisma.notification.deleteMany(),
+    prisma.task.deleteMany(),
+    prisma.revenue.deleteMany(),
+    prisma.expense.deleteMany(),
     prisma.cropCycle.deleteMany(),
     prisma.farm.deleteMany(),
     // prisma.crops.deleteMany(),

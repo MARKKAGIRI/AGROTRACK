@@ -4,14 +4,15 @@ const prisma = new PrismaClient();
 // Create new expense
 const createExpense = async (req, res) => {
   try {
-    const { cropId, type, amount, description, date } = req.body;
+    const { cropCycleId, type, amount, description, date } = req.body;
     const userId = req.user.id;
 
     // Validate required fields
-    if (!cropId || !type || !amount || !date) {
+    // Note: We expect 'cropCycleId' now, not 'cropId'
+    if (!cropCycleId || !type || !amount || !date) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: cropId, type, amount, date'
+        message: 'Missing required fields: cropCycleId, type, amount, date'
       });
     }
 
@@ -23,36 +24,41 @@ const createExpense = async (req, res) => {
       });
     }
 
-    // Verify crop belongs to user
-    const crop = await prisma.crop.findFirst({
+    // Verify the Crop Cycle belongs to a Farm owned by the User
+    const cropCycle = await prisma.cropCycle.findFirst({
       where: {
-        id: cropId,
+        id: cropCycleId,
         farm: {
-          userId: userId
+          ownerId: userId // Correctly checking farm ownership
         }
       }
     });
 
-    if (!crop) {
+    if (!cropCycle) {
       return res.status(404).json({
         success: false,
-        message: 'Crop not found or access denied'
+        message: 'Crop Cycle not found or access denied'
       });
     }
 
     // Create expense
     const expense = await prisma.expense.create({
       data: {
-        cropId,
+        cropCycleId, // Correct Foreign Key
         type,
         amount: parseFloat(amount),
         description: description || null,
         date: new Date(date)
       },
       include: {
-        crop: {
-          select: {
-            name: true,
+        cropCycle: {
+          include: {
+            crop: { // Include static crop details (name, type)
+              select: {
+                cropName: true,
+                cropType: true
+              }
+            },
             farm: {
               select: {
                 name: true
@@ -78,37 +84,43 @@ const createExpense = async (req, res) => {
   }
 };
 
-// Get all expenses for a specific crop
+// Get all expenses for a specific Crop Cycle
 const getExpensesByCrop = async (req, res) => {
   try {
-    const { cropId } = req.params;
+    // We expect the route param to be :cropCycleId, or we map :cropId to cropCycleId
+    const { cropId } = req.params; // Keeping variable name generic if route uses :cropId
+    const cropCycleId = cropId; 
     const userId = req.user.id;
 
-    // Verify crop belongs to user
-    const crop = await prisma.crop.findFirst({
+    // Verify ownership
+    const cropCycle = await prisma.cropCycle.findFirst({
       where: {
-        id: cropId,
+        id: cropCycleId,
         farm: {
-          userId: userId
+          ownerId: userId
         }
       }
     });
 
-    if (!crop) {
+    if (!cropCycle) {
       return res.status(404).json({
         success: false,
-        message: 'Crop not found or access denied'
+        message: 'Crop Cycle not found or access denied'
       });
     }
 
     const expenses = await prisma.expense.findMany({
-      where: { cropId },
+      where: { cropCycleId: cropCycleId },
       orderBy: { date: 'desc' },
       include: {
-        crop: {
-          select: {
-            name: true,
-            variety: true
+        cropCycle: {
+          include: {
+            crop: {
+              select: {
+                cropName: true,
+                cropType: true
+              }
+            }
           }
         }
       }
@@ -133,21 +145,22 @@ const getExpensesByCrop = async (req, res) => {
   }
 };
 
-// Get all expenses for user (across all crops)
+// Get all expenses for the authenticated user (across all their farms)
 const getAllExpenses = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { startDate, endDate, type, cropId } = req.query;
+    const { startDate, endDate, type, cropCycleId } = req.query;
 
+    // Filter expenses where the related CropCycle's Farm is owned by the user
     const whereClause = {
-      crop: {
+      cropCycle: {
         farm: {
-          userId: userId
+          ownerId: userId
         }
       }
     };
 
-    // Apply filters
+    // Apply optional filters
     if (startDate || endDate) {
       whereClause.date = {};
       if (startDate) whereClause.date.gte = new Date(startDate);
@@ -158,18 +171,22 @@ const getAllExpenses = async (req, res) => {
       whereClause.type = type;
     }
 
-    if (cropId) {
-      whereClause.cropId = cropId;
+    if (cropCycleId) {
+      whereClause.cropCycleId = cropCycleId;
     }
 
     const expenses = await prisma.expense.findMany({
       where: whereClause,
       orderBy: { date: 'desc' },
       include: {
-        crop: {
-          select: {
-            name: true,
-            variety: true,
+        cropCycle: {
+          include: {
+            crop: {
+              select: {
+                cropName: true,
+                cropType: true
+              }
+            },
             farm: {
               select: {
                 name: true
@@ -180,7 +197,6 @@ const getAllExpenses = async (req, res) => {
       }
     });
 
-    // Calculate total expenses
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
     return res.status(200).json({
@@ -203,12 +219,12 @@ const getAllExpenses = async (req, res) => {
 const getExpenseSummary = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { startDate, endDate, cropId } = req.query;
+    const { startDate, endDate, cropCycleId } = req.query;
 
     const whereClause = {
-      crop: {
+      cropCycle: {
         farm: {
-          userId: userId
+          ownerId: userId
         }
       }
     };
@@ -219,8 +235,8 @@ const getExpenseSummary = async (req, res) => {
       if (endDate) whereClause.date.lte = new Date(endDate);
     }
 
-    if (cropId) {
-      whereClause.cropId = cropId;
+    if (cropCycleId) {
+      whereClause.cropCycleId = cropCycleId;
     }
 
     const expenses = await prisma.expense.findMany({
@@ -271,17 +287,21 @@ const getExpenseById = async (req, res) => {
     const expense = await prisma.expense.findFirst({
       where: {
         id,
-        crop: {
+        cropCycle: {
           farm: {
-            userId: userId
+            ownerId: userId
           }
         }
       },
       include: {
-        crop: {
-          select: {
-            name: true,
-            variety: true,
+        cropCycle: {
+          include: {
+            crop: {
+              select: {
+                cropName: true,
+                cropType: true
+              }
+            },
             farm: {
               select: {
                 name: true
@@ -320,13 +340,13 @@ const updateExpense = async (req, res) => {
     const userId = req.user.id;
     const { type, amount, description, date } = req.body;
 
-    // Verify expense belongs to user
+    // Verify ownership
     const existingExpense = await prisma.expense.findFirst({
       where: {
         id,
-        crop: {
+        cropCycle: {
           farm: {
-            userId: userId
+            ownerId: userId
           }
         }
       }
@@ -358,9 +378,11 @@ const updateExpense = async (req, res) => {
       where: { id },
       data: updateData,
       include: {
-        crop: {
-          select: {
-            name: true
+        cropCycle: {
+          include: {
+            crop: {
+              select: { cropName: true }
+            }
           }
         }
       }
@@ -387,13 +409,13 @@ const deleteExpense = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Verify expense belongs to user
+    // Verify ownership
     const existingExpense = await prisma.expense.findFirst({
       where: {
         id,
-        crop: {
+        cropCycle: {
           farm: {
-            userId: userId
+            ownerId: userId
           }
         }
       }

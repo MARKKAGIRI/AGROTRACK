@@ -2,7 +2,6 @@ const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 const axios = require('axios');
 
-
 // Get live weather data from OpenWeather API
 const getWeatherFromAPI = async (req, res) => {
   try {
@@ -25,7 +24,8 @@ const getWeatherFromAPI = async (req, res) => {
 
     const apiKey = process.env.OPENWEATHER_API_KEY;
 
-    if (!apiKey) {
+    // Allow execution in test environment without a real key (mocking handles the request)
+    if (!apiKey && process.env.NODE_ENV !== 'test') {
       return res.status(500).json({
         success: false,
         message: 'OpenWeather API key not configured'
@@ -33,11 +33,14 @@ const getWeatherFromAPI = async (req, res) => {
     }
 
     // Call OpenWeather API
+    // Use a dummy key for testing if actual key is missing
+    const appid = apiKey || 'test_key'; 
+    
     const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
       params: {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
-        appid: apiKey,
+        appid: appid,
         units: 'metric' // Use Celsius
       }
     });
@@ -91,10 +94,11 @@ const logWeather = async (req, res) => {
     const userId = req.user.id;
 
     // Verify farm belongs to user
+    // FIXED: Used 'ownerId' instead of 'userId' to match Schema
     const farm = await prisma.farm.findFirst({
       where: {
         id: farmId,
-        userId: userId
+        ownerId: userId 
       }
     });
 
@@ -115,19 +119,21 @@ const logWeather = async (req, res) => {
 
     const apiKey = process.env.OPENWEATHER_API_KEY;
 
-    if (!apiKey) {
+    if (!apiKey && process.env.NODE_ENV !== 'test') {
       return res.status(500).json({
         success: false,
         message: 'OpenWeather API key not configured'
       });
     }
 
+    const appid = apiKey || 'test_key';
+
     // Fetch weather data from OpenWeather API
     const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
       params: {
         lat: farm.latitude,
         lon: farm.longitude,
-        appid: apiKey,
+        appid: appid,
         units: 'metric'
       }
     });
@@ -187,10 +193,11 @@ const getWeatherLogs = async (req, res) => {
     const { startDate, endDate, limit = 30 } = req.query;
 
     // Verify farm belongs to user
+    // FIXED: Used 'ownerId' instead of 'userId'
     const farm = await prisma.farm.findFirst({
       where: {
         id: farmId,
-        userId: userId
+        ownerId: userId
       }
     });
 
@@ -265,7 +272,7 @@ const getAllWeatherLogs = async (req, res) => {
 
     const whereClause = {
       farm: {
-        userId: userId
+        ownerId: userId // FIXED: Used 'ownerId' instead of 'userId'
       }
     };
 
@@ -319,19 +326,21 @@ const getWeatherForecast = async (req, res) => {
 
     const apiKey = process.env.OPENWEATHER_API_KEY;
 
-    if (!apiKey) {
+    if (!apiKey && process.env.NODE_ENV !== 'test') {
       return res.status(500).json({
         success: false,
         message: 'OpenWeather API key not configured'
       });
     }
 
+    const appid = apiKey || 'test_key';
+
     // Call OpenWeather 5-day forecast API
     const response = await axios.get('https://api.openweathermap.org/data/2.5/forecast', {
       params: {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
-        appid: apiKey,
+        appid: appid,
         units: 'metric'
       }
     });
@@ -381,11 +390,12 @@ const deleteWeatherLog = async (req, res) => {
     const userId = req.user.id;
 
     // Verify weather log belongs to user
+    // FIXED: Used 'ownerId' in relation check
     const weatherLog = await prisma.weatherLog.findFirst({
       where: {
         id,
         farm: {
-          userId: userId
+          ownerId: userId 
         }
       }
     });
@@ -418,7 +428,6 @@ const deleteWeatherLog = async (req, res) => {
 module.exports = {
     getAllWeatherLogs,
     getWeatherForecast,
-    getAllWeatherLogs,
     getWeatherFromAPI,
     getWeatherLogs,
     logWeather,
