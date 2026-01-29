@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,378 +7,179 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Animated,
-  Easing,
-  Alert,
-  Share,
-  Pressable,
+  ActivityIndicator,
+  StatusBar
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons, Feather } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext'; // Import Auth Context
+import { sendMessageToAI } from '../../services/aiApi'; 
 
-/*
-  Chat screen for AgroTrack+ assistant - now using NativeWind for styling.
-*/
-
-const COLORS = {
-  primary: '#16a34a', // green-600
-  dark: '#15803d', // green-700
-  lightBg: '#f0fdf4', // green-50
-  white: '#ffffff',
-  gray: '#6b7280',
-};
-
-const STORAGE_KEY = '@agrotrack_chat_messages';
-
-const QUICK_TOPICS = [
-  'Crop rotation tips',
-  'Pest management',
-  'Soil health',
-  'Weather planning',
-  'Irrigation advice',
-  'Fertilizer recommendations',
-];
-
-// helper to format a simple HH:MM time string
-const nowTime = (d = new Date()) =>
-  d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-// Simple keyword-based bot
-const botResponseFor = (text) => {
-  const t = text.toLowerCase();
-  if (t.includes('pest') || t.includes('insect') || t.includes('aphid')) {
-    return "Pest management tip: Inspect plants early in the morning. Use biological controls where possible (ladybugs, neem oil). For severe outbreaks, consider targeted pesticide application following label instructions.";
-  }
-  if (t.includes('soil') || t.includes('ph') || t.includes('nutrient')) {
-    return "Soil health advice: Test your soil for pH and nutrients. Add organic matter (compost) to improve structure and microbial activity. Rotate legumes to replenish nitrogen.";
-  }
-  if (t.includes('irrig') || t.includes('water')) {
-    return "Irrigation advice: Water in early morning to reduce evaporation and disease. Use drip irrigation for efficiency and monitor soil moisture rather than a fixed schedule.";
-  }
-  if (t.includes('weather')) {
-    return "Weather planning: Check short-term forecasts before fieldwork. For frost risk, protect sensitive crops with covers; for heavy rain, avoid compacting wet soils.";
-  }
-  if (t.includes('crop rotation') || t.includes('rotation')) {
-    return "Crop rotation tip: Alternate families (e.g., cereals -> legumes -> brassicas) to reduce pests/diseases and improve soil fertility.";
-  }
-  if (t.includes('organic')) {
-    return "Organic approach: Use compost, green manures, and biological pest control. Focus on building soil life and crop diversity.";
-  }
-  return "Here's a tip: Keep records of tasks and observations. If you give me more details (crop, problem, location), I can provide tailored advice.";
-};
-
-/* TypingIndicator - Animated three-dot indicator */
-function TypingIndicator() {
-  const anim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(anim, { toValue: 1, duration: 450, easing: Easing.linear, useNativeDriver: true }),
-        Animated.timing(anim, { toValue: 0, duration: 450, easing: Easing.linear, useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [anim]);
-
-  const dotStyle = {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.gray,
-    marginHorizontal: 4,
-    opacity: anim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0.25, 1],
-    }),
-    transform: [
-      {
-        translateY: anim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, -6],
-        }),
-      },
-    ],
-  };
-
-  return (
-    <View className="py-1.5 items-start" accessibilityLabel="Bot typing indicator">
-      <View className="flex-row bg-white p-2 rounded-xl shadow-sm ml-12 items-end">
-        <Animated.View style={dotStyle} />
-        <Animated.View style={dotStyle} />
-        <Animated.View style={dotStyle} />
-      </View>
-    </View>
-  );
-}
-
-/* MessageBubble - Renders a single message */
-function MessageBubble({ item, onLongPress }) {
-  const isUser = item.sender === 'user';
-  return (
-    <Pressable
-      onLongPress={() => onLongPress && onLongPress(item)}
-      accessibilityLabel={isUser ? 'Your message' : 'Assistant message'}
-      className={`flex-row items-end my-1.5 ${isUser ? 'justify-end' : 'justify-start'}`}
-    >
-      {!isUser && (
-        <View className="w-[34px] h-[34px] rounded-lg bg-[#16a34a] items-center justify-center mr-2">
-          <MaterialCommunityIcons name="leaf" size={18} color={COLORS.white} />
-        </View>
-      )}
-      <View 
-        className={`max-w-[80%] p-3 rounded-xl shadow-sm ${
-          isUser 
-            ? 'bg-[#16a34a] rounded-tr-sm rounded-tl-xl rounded-bl-xl' 
-            : 'bg-white rounded-tl-sm rounded-tr-xl rounded-br-xl'
-        }`}
-      >
-        <Text className={`text-sm leading-[18px] ${isUser ? 'text-white' : 'text-[#111]'}`}>
-          {item.text}
-        </Text>
-        <Text className="text-[11px] text-gray-400 mt-1.5 self-end">{item.time}</Text>
-      </View>
-      {isUser && (
-        <View className="w-[34px] h-[34px] rounded-full bg-gray-600 items-center justify-center ml-2">
-          <Feather name="user" size={18} color="#fff" />
-        </View>
-      )}
-    </Pressable>
-  );
-}
-
-/* ChatScreen main component */
-export default function ChatScreen() {
-  const [messages, setMessages] = useState([]);
+const ChatScreen = ({ navigation }) => {
+  const { user, token } = useAuth(); // Get user details and token
+  const flatListRef = useRef();
+  
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [loadingRestore, setLoadingRestore] = useState(true);
-  const listRef = useRef(null);
+  const [messages, setMessages] = useState([
+    {
+        id: '1',
+        sender: 'bot',
+        // Personalized greeting based on auth data
+        text: `Hello ${user?.name || 'there'}! I am Agrotrack AI. I have loaded your farm details. How can I help you today?`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+  ]);
 
-  // restore conversation or set a welcome message
-  useEffect(() => {
-    (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) setMessages(JSON.parse(raw));
-        else {
-          const welcome = {
-            id: `b-${Date.now()}`,
-            sender: 'bot',
-            text: 'Hello! I am AgroTrack+ Assistant. Ask me about pests, soil, irrigation, weather, or crop rotation.',
-            time: nowTime(),
-          };
-          setMessages([welcome]);
-        }
-      } catch (e) {
-        console.warn('Restore chat failed', e);
-      } finally {
-        setLoadingRestore(false);
-      }
-    })();
-  }, []);
+  // --- Handlers ---
 
-  // persist messages whenever they change and auto-scroll to latest
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    // 1. Add User Message immediately (Optimistic UI)
+    const userMsg = {
+      id: Date.now().toString(),
+      sender: 'user',
+      text: input.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
+    setIsTyping(true);
+
+    // 2. Call Backend Service
+    // Pass userId and token so backend can fetch context
+    const response = await sendMessageToAI(user.user_id, userMsg.text, token);
+
+    // 3. Add AI Response
+    const botMsg = {
+      id: (Date.now() + 1).toString(),
+      sender: 'bot',
+      text: response.text,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setIsTyping(false);
+    setMessages(prev => [...prev, botMsg]);
+  };
+
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages)).catch((e) =>
-      console.warn('Save chat failed', e)
+    flatListRef.current?.scrollToEnd({ animated: true });
+  }, [messages, isTyping]);
+
+  // --- Render Components ---
+
+  const renderMessage = ({ item }) => {
+    const isUser = item.sender === 'user';
+    return (
+      <View className={`flex-row mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
+        {!isUser && (
+           <View className="w-8 h-8 rounded-full bg-[#E8F5E9] items-center justify-center mr-2 border border-green-100">
+             <Ionicons name="sparkles" size={16} color="#2E7D32" />
+           </View>
+        )}
+        
+        <View className={`max-w-[80%] p-4 rounded-2xl ${
+            isUser 
+            ? 'bg-[#2E7D32] rounded-tr-sm' 
+            : 'bg-white border border-gray-100 rounded-tl-sm shadow-sm'
+        }`}>
+            <Text className={`text-[15px] leading-5 ${isUser ? 'text-white' : 'text-[#1A1C1B]'}`}>
+                {item.text}
+            </Text>
+            <Text className={`text-[10px] mt-2 text-right ${isUser ? 'text-green-200' : 'text-gray-400'}`}>
+                {item.time}
+            </Text>
+        </View>
+      </View>
     );
-    if (listRef.current && messages.length) {
-      setTimeout(() => listRef.current.scrollToOffset({ offset: 0, animated: true }), 200);
-    }
-  }, [messages]);
-
-  // sendMessage: add user message, clear input, simulate bot response
-  const sendMessage = useCallback(
-    (text) => {
-      if (!text || !text.trim()) return;
-      const userMsg = {
-        id: `u-${Date.now()}`,
-        sender: 'user',
-        text: text.trim(),
-        time: nowTime(),
-      };
-      setMessages((m) => [userMsg, ...m]);
-      setInput('');
-      setIsTyping(true);
-
-      setTimeout(() => {
-        const botText = botResponseFor(text);
-        const botMsg = {
-          id: `b-${Date.now()}`,
-          sender: 'bot',
-          text: botText,
-          time: nowTime(),
-        };
-        setMessages((m) => [botMsg, ...m]);
-        setIsTyping(false);
-      }, 900 + Math.random() * 800);
-    },
-    [setMessages]
-  );
-
-  const onQuickTopic = (topic) => {
-    setInput(topic);
   };
-
-  const clearConversation = async () => {
-    Alert.alert('Clear conversation', 'Are you sure you want to clear the chat?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear',
-        style: 'destructive',
-        onPress: async () => {
-          setMessages([]);
-          await AsyncStorage.removeItem(STORAGE_KEY);
-        },
-      },
-    ]);
-  };
-
-  const handleLongPressMessage = async (item) => {
-    Alert.alert('Message actions', '', [
-      { text: 'Copy', onPress: () => copyToClipboard(item.text) },
-      { text: 'Share', onPress: () => shareMessage(item) },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
-
-  const copyToClipboard = (text) => {
-    try {
-      const Clipboard = require('react-native').Clipboard || require('expo-clipboard');
-      if (Clipboard && Clipboard.setString) {
-        Clipboard.setString(text);
-        Alert.alert('Copied', 'Message copied to clipboard.');
-        return;
-      }
-    } catch (e) {
-      /* ignore */
-    }
-    Share.share({ message: text }).catch(() => {});
-  };
-
-  const shareMessage = async (item) => {
-    try {
-      await Share.share({ message: `${item.sender === 'user' ? 'You' : 'Assistant'}: ${item.text}` });
-    } catch (e) {
-      console.warn('Share failed', e);
-    }
-  };
-
-  const exportConversation = async () => {
-    const text = messages
-      .slice()
-      .reverse()
-      .map((m) => `${m.time} ${m.sender === 'user' ? 'You' : 'Assistant'}: ${m.text}`)
-      .join('\n\n');
-    try {
-      await Share.share({ message: text || 'No messages' });
-    } catch (e) {
-      console.warn('Export failed', e);
-    }
-  };
-
-  const renderItem = ({ item }) => <MessageBubble item={item} onLongPress={handleLongPressMessage} />;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f0fdf4]">
-      {/* Header with gradient */}
-      <LinearGradient
-        colors={[COLORS.primary, COLORS.dark]}
-        start={[0, 0]}
-        end={[1, 1]}
-        className={`${Platform.OS === 'android' ? 'pt-5' : 'pt-2'} pb-3 px-3.5`}
-      >
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center">
-            <View className="w-11 h-11 rounded-xl bg-white items-center justify-center">
-              <MaterialCommunityIcons name="leaf" size={22} color={COLORS.primary} />
+    <SafeAreaView className="flex-1 bg-[#FDFDFD]">
+      <StatusBar barStyle="dark-content" />
+      
+      {/* 1. Clean Header */}
+      <View className="px-5 py-3 border-b border-gray-100 flex-row items-center justify-between bg-white">
+        <TouchableOpacity 
+            onPress={() => navigation.goBack()}
+            className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center"
+        >
+            <Feather name="arrow-left" size={20} color="#1A1C1B" />
+        </TouchableOpacity>
+
+        <View className="items-center">
+            <Text className="font-bold text-lg text-[#1A1C1B]">Agrotrack AI</Text>
+            <View className="flex-row items-center">
+                <View className="w-2 h-2 rounded-full bg-green-500 mr-1.5" />
+                <Text className="text-xs text-gray-500">Online</Text>
             </View>
-            <View className="ml-2.5">
-              <Text className="text-white font-bold text-base">AgroTrack+ AI Assistant</Text>
-              <Text className="text-[#d1f7dc] text-xs mt-0.5">Your smart farming companion</Text>
-            </View>
-          </View>
-          <View className="flex-row items-center">
-            <TouchableOpacity onPress={clearConversation} accessibilityLabel="Clear conversation" className="ml-3 p-1.5">
-              <Feather name="trash-2" size={18} color={COLORS.white} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={exportConversation} accessibilityLabel="Share conversation" className="ml-3 p-1.5">
-              <Feather name="share-2" size={18} color={COLORS.white} />
-            </TouchableOpacity>
-          </View>
         </View>
-      </LinearGradient>
 
-      {/* Main area with keyboard handling */}
-      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 px-3 pt-3">
-            {/* Quick topics */}
-            <View className="h-[52px] mb-2">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="items-center pr-2">
-                {QUICK_TOPICS.map((t) => (
-                  <TouchableOpacity
-                    key={t}
-                    className="bg-white px-3 py-2 rounded-full mr-2 border border-[#e6f6ea] shadow-sm"
-                    onPress={() => onQuickTopic(t)}
-                    accessibilityLabel={`Quick topic ${t}`}
-                  >
-                    <Text className="text-[#16a34a] font-semibold text-[13px]">{t}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+        <TouchableOpacity className="w-10 h-10 items-center justify-center">
+             <Feather name="more-horizontal" size={20} color="#1A1C1B" />
+        </TouchableOpacity>
+      </View>
+
+      {/* 2. Chat Area */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+        className="flex-1"
+        keyboardVerticalOffset={10}
+      >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={item => item.id}
+          renderItem={renderMessage}
+          contentContainerStyle={{ padding: 20, paddingBottom: 20 }}
+          className="flex-1 bg-[#F9FAFB]"
+          ListFooterComponent={
+            isTyping && (
+                <View className="flex-row items-center ml-2 mb-4">
+                    <View className="w-8 h-8 rounded-full bg-[#E8F5E9] items-center justify-center mr-2">
+                        <Ionicons name="sparkles" size={16} color="#2E7D32" />
+                    </View>
+                    <View className="bg-white p-3 rounded-2xl rounded-tl-sm border border-gray-100 shadow-sm">
+                        <ActivityIndicator size="small" color="#2E7D32" />
+                    </View>
+                </View>
+            )
+          }
+        />
+
+        {/* 3. Input Area */}
+        <View className="p-4 bg-white border-t border-gray-100 flex-row items-center safe-pb">
+            <TouchableOpacity className="mr-3 p-2 bg-gray-50 rounded-full">
+                <Feather name="plus" size={20} color="#6B7280" />
+            </TouchableOpacity>
+
+            <View className="flex-1 bg-[#F3F4F6] rounded-full px-4 py-3 flex-row items-center focus:border-green-500 border border-transparent">
+                <TextInput
+                    value={input}
+                    onChangeText={setInput}
+                    placeholder="Ask about your crops..."
+                    placeholderTextColor="#9CA3AF"
+                    className="flex-1 text-[#1A1C1B] text-base max-h-24"
+                    multiline
+                />
             </View>
 
-            {/* Messages */}
-            <View className="flex-1 mb-2">
-              <FlatList
-                ref={listRef}
-                data={messages}
-                renderItem={renderItem}
-                keyExtractor={(i) => i.id}
-                inverted
-                contentContainerStyle={{ paddingTop: 12, paddingBottom: 12 }}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-              />
-              {isTyping && <TypingIndicator />}
-            </View>
-
-            {/* Input */}
-            <View className="flex-row items-end py-2 px-1.5 bg-[#f0fdf4] border-t border-[#e6f6ea]">
-              <TextInput
-                className={`flex-1 min-h-[44px] max-h-[120px] bg-white rounded-xl px-3 ${Platform.OS === 'ios' ? 'py-2.5' : 'py-2'} text-[15px] mr-2 border border-[#eef7ee]`}
-                value={input}
-                onChangeText={setInput}
-                placeholder="Ask about pests, soil, watering..."
-                multiline
-                accessibilityLabel="Message input"
-                returnKeyType="send"
-                onSubmitEditing={() => {
-                  if (input.trim()) sendMessage(input);
-                }}
-              />
-              <TouchableOpacity
-                className={`bg-[#16a34a] w-12 h-12 rounded-xl items-center justify-center ${!input.trim() && 'opacity-50'}`}
-                onPress={() => {
-                  if (input.trim()) sendMessage(input);
-                }}
+            <TouchableOpacity 
+                onPress={handleSend}
                 disabled={!input.trim()}
-                accessibilityLabel="Send message"
-              >
-                <Ionicons name="send" size={20} color={COLORS.white} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
+                className={`ml-3 w-12 h-12 rounded-full items-center justify-center shadow-sm ${
+                    input.trim() ? 'bg-[#2E7D32]' : 'bg-gray-200'
+                }`}
+            >
+                <Ionicons name="send" size={20} color="white" />
+            </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+};
+
+export default ChatScreen;

@@ -1,369 +1,132 @@
-import React, { useState, useEffect, useMemo } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  ActivityIndicator,
-  FlatList,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import { useAuth } from "../../context/AuthContext";
-import { getFarmById, getCropsByFarmId } from "../../services/farmApi";
-import {
-  getDaysSincePlanting,
-  getSeasonProgress,
-  getHarvestWindow,
-} from "../../utils/cropCycleHelpers";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, ImageBackground, Image } from "react-native";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+
+// Import your new components
+import TasksTab from "./tabs/TasksTab";
+import MonitoringTab from "./tabs/MonitoringTab";
+import IntegrationsTab from "./tabs/IntegrationsTab";
+import SettingsTab from "./tabs/SettingsTab";
 
 export default function FarmDetailsScreen() {
-  const route = useRoute();
   const navigation = useNavigation();
-  const { farmId } = route.params;
-  const { token } = useAuth();
+  const [activeTab, setActiveTab] = useState("Task");
 
-  const [farm, setFarm] = useState(null);
-  const [crops, setCrops] = useState([]);
-  const [cropDetails, setCropDetails] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingCrops, setLoadingCrops] = useState(true);
-
-  // --- Data Fetching ---
-  useEffect(() => {
-    const fetchFarmData = async () => {
-      try {
-        const [farmRes, cropsRes] = await Promise.all([
-          getFarmById(farmId, token),
-          getCropsByFarmId(farmId, token),
-        ]);
-
-        if (farmRes.success) setFarm(farmRes.farm);
-        if (cropsRes.success) setCrops(cropsRes.crops || []);
-      } catch (error) {
-        console.log("Error fetching farm data:", error);
-      } finally {
-        setLoading(false);
-        setLoadingCrops(false);
-      }
-    };
-
-    fetchFarmData();
-  }, [farmId, token]);
-
-  // --- Derived Calculations (Financials & Tasks) ---
-  const { totalRevenue, totalExpenses, pendingTasks } = useMemo(() => {
-    let rev = 0;
-    let exp = 0;
-    let tasks = [];
-
-    // Loop through all crops to aggregate data
-    crops.forEach((crop) => {
-      // Sum Revenue
-      if (crop.revenues) {
-        crop.revenues.forEach((r) => (rev += r.amount));
-      }
-      // Sum Expenses
-      if (crop.expenses) {
-        crop.expenses.forEach((e) => (exp += e.amount));
-      }
-      // Collect Pending Tasks
-      if (crop.tasks) {
-        const pending = crop.tasks
-          .filter((t) => t.status === "pending")
-          .map((t) => ({
-            ...t,
-            cropName: crop.crop?.name || "Unknown Crop", // Assuming crop relation has name
-          }));
-        tasks = [...tasks, ...pending];
-      }
-    });
-
-    return {
-      totalRevenue: rev,
-      totalExpenses: exp,
-      pendingTasks: tasks,
-    };
-  }, [crops]);
-
-  // --- Helper Functions ---
-  const formatCurrency = (amount) => {
-    return `$${amount.toLocaleString()}`; // Change symbol based on your region
+  const renderContent = () => {
+    switch (activeTab) {
+      case "Task": return <TasksTab />;
+      case "Monitoring": return <MonitoringTab />;
+      case "Integrations": return <IntegrationsTab />;
+      case "Settings": return <SettingsTab />;
+      default: return <TasksTab />;
+    }
   };
-
-  const getStatusColor = (status) => {
-    const s = status?.toLowerCase();
-    if (s === "growing") return "bg-green-100 text-green-700";
-    if (s === "harvested") return "bg-blue-100 text-blue-700";
-    if (s === "failed") return "bg-red-100 text-red-700";
-    return "bg-gray-100 text-gray-600";
-  };
-
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-gray-50">
-        <ActivityIndicator size="large" color="#16a34a" />
-      </SafeAreaView>
-    );
-  }
-
-  if (!farm) return null; // Handle not found appropriately
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar barStyle="light-content" backgroundColor="#16a34a" />
+    <View className="flex-1 bg-white">
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      {/* --- Header Section --- */}
-      <View className="bg-[#2e7d32] pb-8 rounded-b-[10px] shadow-md">
-        <View className="px-6 mt-6 flex-row items-center">
-          <View className="w-16 h-16 bg-white rounded-2xl items-center justify-center shadow-lg">
-            <Ionicons name="leaf" size={32} color="#16a34a" />
-          </View>
-          <View className="ml-4 flex-1">
-            <Text className="text-2xl font-bold text-white tracking-tight">
-              {farm.name}
-            </Text>
-            <View className="flex-row items-center mt-1">
-              <Ionicons name="location-sharp" size={14} color="#bbf7d0" />
-              <Text className="text-green-100 ml-1 text-sm font-medium">
-                {farm.location}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <ScrollView
-        className="flex-1 -mt-6 px-5"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* --- Financial Overview (New Section) --- */}
-        <View className="bg-white rounded-3xl p-5 shadow-sm mb-5 flex-row justify-between items-center">
-          <View>
-            <Text className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">
-              Total Revenue
-            </Text>
-            <Text className="text-xl font-bold text-gray-800">
-              {formatCurrency(totalRevenue)}
-            </Text>
-          </View>
-          <View className="h-10 w-[1px] bg-gray-100" />
-          <View>
-            <Text className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">
-              Total Expenses
-            </Text>
-            <Text className="text-xl font-bold text-gray-800">
-              {formatCurrency(totalExpenses)}
-            </Text>
-          </View>
-          <View className="h-10 w-[1px] bg-gray-100" />
-          <View>
-            <Text className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">
-              Net Profit
-            </Text>
-            <Text
-              className={`text-xl font-bold ${totalRevenue - totalExpenses >= 0 ? "text-green-600" : "text-red-500"}`}
-            >
-              {formatCurrency(totalRevenue - totalExpenses)}
-            </Text>
-          </View>
-        </View>
-
-        {/* --- Pending Tasks (New Section) --- */}
-        <View className="mb-6">
-          <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-gray-800 font-bold text-lg">
-              Pending Tasks
-            </Text>
-            <TouchableOpacity>
-              <Text className="text-green-600 text-sm font-semibold">
-                See All
-              </Text>
+      <ScrollView showsVerticalScrollIndicator={false} className="flex-1 pb-32">
+        {/* --- Satellite Header & Field Outline --- */}
+        <View className="relative h-80 w-full">
+          <ImageBackground
+            source={{ uri: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef' }}
+            className="w-full h-full justify-between p-6 pt-12"
+            resizeMode="cover"
+          >
+            <TouchableOpacity onPress={() => navigation.goBack()} className="bg-white h-10 w-10 rounded-xl items-center justify-center shadow-sm">
+               <Feather name="arrow-left" size={20} color="black" />
             </TouchableOpacity>
-          </View>
 
-          {pendingTasks.length === 0 ? (
-            <View className="bg-white p-6 rounded-3xl items-center justify-center border border-dashed border-gray-200">
-              <Ionicons
-                name="checkmark-done-circle-outline"
-                size={32}
-                color="#d1d5db"
-              />
-              <Text className="text-gray-400 text-sm mt-2">
-                No pending tasks
-              </Text>
-            </View>
-          ) : (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {pendingTasks.map((task) => (
-                <View
-                  key={task.id}
-                  className="bg-white p-4 rounded-2xl mr-3 w-48 shadow-sm border border-gray-50"
-                >
-                  <View className="flex-row justify-between items-start mb-2">
-                    <View className="bg-orange-100 px-2 py-1 rounded-md">
-                      <Text className="text-orange-600 text-[10px] font-bold uppercase">
-                        Pending
-                      </Text>
-                    </View>
-                    <Ionicons name="time-outline" size={16} color="#9ca3af" />
-                  </View>
-                  <Text
-                    className="text-gray-800 font-semibold mb-1"
-                    numberOfLines={1}
-                  >
-                    {task.title}
-                  </Text>
-                  <Text
-                    className="text-gray-400 text-xs mb-3"
-                    numberOfLines={1}
-                  >
-                    {task.cropName}
-                  </Text>
+            {/* Field Polygon Overlay */}
+            <Image 
+                source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/White_polygon.svg/1024px-White_polygon.svg.png' }} 
+                className="absolute top-20 left-10 w-64 h-40 opacity-80"
+                resizeMode="contain"
+            />
 
-                  {/* Task Action Mock Button */}
-                  <TouchableOpacity className="bg-gray-50 p-2 rounded-xl items-center">
-                    <Text className="text-gray-600 text-xs font-semibold">
-                      Mark Done
-                    </Text>
-                  </TouchableOpacity>
+            <View className="flex-row justify-between items-end mb-4">
+                <View className="bg-white/90 px-3 py-1.5 rounded-md">
+                    <Text className="text-[10px] font-semibold text-gray-800">Generate by Satellite imagery services</Text>
                 </View>
-              ))}
-            </ScrollView>
-          )}
+                <TouchableOpacity className="bg-white h-10 w-10 rounded-xl items-center justify-center shadow-sm">
+                    <Feather name="maximize" size={20} color="black" />
+                </TouchableOpacity>
+            </View>
+          </ImageBackground>
         </View>
 
-        {/* --- Crop Cycles List --- */}
-        <View className="mb-10">
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-lg font-bold text-gray-800">Crop Cycles</Text>
-            <TouchableOpacity
-              className="flex-row items-center bg-green-50 px-3 py-1.5 rounded-full"
-              onPress={() => navigation.navigate("AddCrop", { farmId })}
-            >
-              <Ionicons name="add" size={16} color="#16a34a" />
-              <Text className="text-xs font-bold text-green-700 ml-1">
-                Add Cycle
-              </Text>
+        {/* --- Main Data Container --- */}
+        <View className="-mt-6 bg-white rounded-t-[32px] px-5 pt-8 pb-10 shadow-lg min-h-screen">
+          
+          {/* Header Row */}
+          <View className="flex-row justify-between items-center mb-6">
+            <View className="flex-row items-center">
+                <Text className="text-2xl font-bold text-[#1A1C1B]">Tomatoes Field</Text>
+                <TouchableOpacity className="ml-2"><Feather name="edit-2" size={16} color="#9CA3AF" /></TouchableOpacity>
+            </View>
+            <TouchableOpacity className="bg-[#F3F5F4] px-3 py-2 rounded-lg flex-row items-center">
+                <Text className="text-[#1A1C1B] font-medium mr-1 text-xs">More Details</Text>
+                <Feather name="chevron-right" size={14} color="#1A1C1B" />
             </TouchableOpacity>
           </View>
 
-          {loadingCrops ? (
-            <View className="bg-white rounded-3xl p-6 shadow-sm items-center">
-              <ActivityIndicator size="large" color="#16a34a" />
-              <Text className="text-gray-400 text-sm mt-3">
-                Loading crop cycles...
-              </Text>
-            </View>
-          ) : crops.length === 0 ? (
-            <View className="bg-white rounded-3xl p-8 items-center shadow-sm">
-              <Ionicons name="leaf-outline" size={40} color="#d1d5db" />
-              <Text className="text-gray-500 font-semibold mt-3">
-                No crop cycles yet
-              </Text>
-              <Text className="text-gray-400 text-sm text-center mt-1">
-                Start tracking planting, growth, and harvest by adding a crop
-                cycle.
-              </Text>
+          {/* Info Grid */}
+          <View className="flex-row flex-wrap justify-between mb-8">
+            <InfoCard label="Crop Health" value="Good" isBadge badgeColor="bg-[#E8F5E9]" textColor="text-[#2E7D32]" icon="chevron-right" />
+            <InfoCard label="Planting date" value="12/01/2024" />
+            <InfoCard label="Expenses" value="$2,314.00" subValue="-10%" subColor="text-[#2E7D32]" icon="chevron-right" />
+            <InfoCard label="Harvest time" value="~4 Months" />
+          </View>
 
-              <TouchableOpacity
-                onPress={() => navigation.navigate("AddCrop", { farmId })}
-                className="mt-4 bg-green-600 px-6 py-2 rounded-full"
-              >
-                <Text className="text-white font-semibold">Add First Crop</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            crops.map((cycle) => {
-              const daysSincePlanting = getDaysSincePlanting(
-                cycle.plantingDate
-              );
-              const seasonProgress = getSeasonProgress(
-                daysSincePlanting,
-                cycle.crop?.growthData?.seasonLengthDays
-              );
-
-              const { minDate, maxDate } = getHarvestWindow(
-                cycle.plantingDate,
-                cycle.crop?.growthData?.seasonLengthDays
-              );
-
-              return (
-                <TouchableOpacity
-                  key={cycle.id}
-                  onPress={() =>
-                    navigation.navigate("CropCycle", {
-                      cropCycleId: cycle.id,
-                      farmId,
-                    })
-                  }
-                  className="bg-white rounded-3xl p-5 mb-4 shadow-sm border border-gray-100"
+          {/* Tab Navigation */}
+          <View className="flex-row justify-between border-b border-[#F0F2F1] mb-6">
+            {['Task', 'Monitoring', 'Integrations', 'Settings'].map((tab) => (
+                <TouchableOpacity 
+                    key={tab} 
+                    onPress={() => setActiveTab(tab)}
+                    className={`pb-3 border-b-2 ${activeTab === tab ? 'border-[#2E7D32]' : 'border-transparent'}`}
                 >
-                  {/* Header */}
-                  <View className="flex-row items-center mb-3">
-                    <View className="w-12 h-12 bg-green-50 rounded-2xl items-center justify-center mr-4">
-                      <Ionicons name="leaf-outline" size={24} color="#16a34a" />
-                    </View>
-
-                    <View className="flex-1">
-                      <Text className="text-base font-bold text-gray-800">
-                        {cycle.crop?.cropName || "Crop"}
-                      </Text>
-                      <Text className="text-xs text-gray-400">
-                        Planted on{" "}
-                        {new Date(cycle.plantingDate).toLocaleDateString()}
-                      </Text>
-                    </View>
-
-                    <View
-                      className={`px-2 py-0.5 rounded-full ${getStatusColor(cycle.status)}`}
-                    >
-                      <Text className="text-[10px] font-bold uppercase">
-                        {cycle.status}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Progress */}
-                  <View className="mb-3">
-                    <View className="flex-row justify-between mb-1">
-                      <Text className="text-xs text-gray-500">
-                        Day {daysSincePlanting}
-                      </Text>
-                      <Text className="text-xs font-semibold text-green-600">
-                        {seasonProgress}%
-                      </Text>
-                    </View>
-
-                    <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <View
-                        className="h-full bg-green-500"
-                        style={{ width: `${seasonProgress}%` }}
-                      />
-                    </View>
-                  </View>
-
-                  {/* Footer */}
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <Ionicons name="time-outline" size={14} color="#9ca3af" />
-                      <Text className="text-xs text-gray-500 ml-1">
-                        {daysSincePlanting} days since planting
-                      </Text>
-                    </View>
-
-                    <Text className="text-xs text-gray-500">
-                      Harvest: {minDate} – {maxDate}
-                    </Text>
-                  </View>
+                    <Text className={`font-semibold ${activeTab === tab ? 'text-[#2E7D32]' : 'text-[#9CA3AF]'}`}>{tab}</Text>
                 </TouchableOpacity>
-              );
-            })
-          )}
+            ))}
+          </View>
+
+          {/* --- Dynamic Tab Content --- */}
+          {renderContent()}
+
         </View>
       </ScrollView>
-    </SafeAreaView>
+
+      <TouchableOpacity 
+        className="absolute bottom-8 right-6 h-16 w-16 bg-[#2E7D32] rounded-full items-center justify-center shadow-xl z-50"
+        activeOpacity={0.8}
+        // onPress={() => navigation.navigate('ChatScreen')} 
+      >
+          {/* 'sparkles' exists in Ionicons and is the standard AI icon */}
+          <Ionicons name="sparkles" size={30} color="white" />
+      </TouchableOpacity>
+    </View>
   );
 }
+
+// Reusable Info Card Component
+const InfoCard = ({ label, value, subValue, subColor, isBadge, badgeColor, textColor, icon }) => (
+  <View className="w-[48%] bg-white border border-[#F3F5F4] p-4 rounded-2xl mb-4 shadow-sm">
+    <Text className="text-gray-400 text-xs mb-2">{label}</Text>
+    <View className="flex-row items-center justify-between">
+        {isBadge ? (
+            <View className={`${badgeColor} px-2 py-1 rounded-md`}>
+                <Text className={`${textColor} font-bold text-xs`}>{value}</Text>
+            </View>
+        ) : (
+            <View className="flex-row items-baseline">
+                <Text className="text-[#1A1C1B] font-bold text-base">{value}</Text>
+                {subValue && <Text className={`text-xs ml-2 ${subColor} font-medium`}>{subValue}</Text>}
+            </View>
+        )}
+        {icon && <View className="bg-gray-50 rounded-full p-1"><Feather name={icon} size={12} color="gray" /></View>}
+    </View>
+  </View>
+);

@@ -134,12 +134,7 @@ export default function MainAppStack() {
         name="FarmDetails"
         component={FarmDetailsScreen}
         options={{
-          title: "",
-          headerBackTitleVisible: false,
-          headerTintColor: "#fff",
-          headerStyle: {
-            backgroundColor: "#2e7d32", // optional
-          },
+          headerShown: false,
         }}
       />
 

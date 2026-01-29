@@ -22,9 +22,9 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/weather', require('./routes/weatherRoutes'));
 app.use("/api/crops", require("./routes/cropRoutes"));
 
-// use chatroutes
-
+// ai chat routes
 app.use("/api", require("./routes/chatRoutes"));
+
 // Test Route
 app.get('/api/test', (req, res) => {
   console.log('✅ /test route was hit from mobile!');
