@@ -1,18 +1,325 @@
-AGROTRACK GUIDE: MAIZE FARMING (KENYA)
+AGROTRACK COMPREHENSIVE GUIDE: MAIZE FARMING IN KENYA
 
-1. SOIL REQUIREMENTS
-Maize performs best in well-drained, fertile loamy soils.
-Optimal pH is 5.5 to 7.0.
-If pH is below 5.5 (Acidic), apply agricultural lime (2 tons/ha) 3 weeks before planting.
+==================================================
+SECTION 1: SOIL REQUIREMENTS & PREPARATION
+==================================================
 
-2. FERTILIZER APPLICATION
-- At Planting: Apply DAP (Di-Ammonium Phosphate) at a rate of 50kg per acre.
-- Top Dressing: Apply CAN (Calcium Ammonium Nitrate) when maize is knee-high (approx 4 weeks after germination). Rate: 50kg per acre.
+SOIL TYPE:
+- Best Performance: Well-drained, fertile loamy soils
+- Acceptable: Sandy loam, clay loam
+- Avoid: Waterlogged or compacted soils
+- Optimal pH Range: 5.5 to 7.0
+- Critical pH Threshold: Below 5.5 (Too acidic - requires treatment)
 
-3. DISEASE MANAGEMENT
-- Maize Lethal Necrosis (MLN): Symptoms include chlorotic mottling of leaves. Control: Practice crop rotation with non-cereal crops like beans.
-- Fall Armyworm: Caterpillars that eat leaves and whorls. Control: Spray with Emamectin Benzoate early in the morning.
+SOIL TESTING & AMENDMENT:
+- Test soil pH before planting season (costs approximately 500-1000 KES per test)
+- If pH is below 5.5: Apply agricultural lime at 2 tons/hectare (approximately 800kg per acre)
+- Apply lime 3 weeks before planting to allow proper soil reaction
+- Cost of lime: Approximately 1,500-2,500 KES per 50kg bag
 
-4. HARVESTING
-Harvest when the moisture content drops below 15%.
-Signs of maturity: A black layer forms at the base of the kernel.
+LAND PREPARATION:
+- First plowing: 6-8 weeks before planting (depth: 15-20cm)
+- Second plowing: 2-3 weeks before planting
+- Make ridges or furrows for proper drainage
+- Clear all weeds and crop residues
+
+==================================================
+SECTION 2: PLANTING GUIDELINES
+==================================================
+
+BEST PLANTING TIME IN KENYA:
+- Long Rains: March to May
+- Short Rains: October to December
+- Meru Region Specific: Late March-April, October-November
+
+SEED SELECTION:
+Popular Hybrid Varieties in Kenya:
+- DH04: Drought tolerant, matures in 3.5-4 months
+- H614: High yielding, matures in 4-4.5 months
+- Pannar 413: Medium altitude, good disease resistance
+- KH500-17A: Short season variety (3 months)
+
+SEED RATE & SPACING:
+- Seed Rate: 10kg per acre (25kg per hectare)
+- Spacing: 75cm between rows, 25cm between plants (for hybrid varieties)
+- Plant 2 seeds per hole, thin to 1 after germination
+- Target Population: 53,000 plants per hectare (21,000 per acre)
+
+PLANTING DEPTH:
+- 5cm deep in heavy soils
+- 7-8cm deep in light/sandy soils
+
+==================================================
+SECTION 3: FERTILIZER APPLICATION SCHEDULE
+==================================================
+
+BASAL FERTILIZER (At Planting):
+- Type: DAP (Di-Ammonium Phosphate) 18:46:0
+- Rate: 50kg per acre (125kg per hectare)
+- Application Method: Band placement 5cm away from seed
+- Cost: Approximately 5,500-6,500 KES per 50kg bag
+- Timing: During planting
+
+TOP DRESSING (First Application):
+- Type: CAN (Calcium Ammonium Nitrate) 26:0:0
+- Rate: 50kg per acre (125kg per hectare)
+- Timing: When maize is knee-high (4-5 weeks after germination)
+- Application Method: Side dress 10cm from plant base
+- Cost: Approximately 4,000-5,000 KES per 50kg bag
+
+TOP DRESSING (Second Application - Optional for high yield):
+- Same fertilizer: CAN 26:0:0
+- Rate: 25kg per acre
+- Timing: 8-10 weeks after planting (tasseling stage)
+- Note: Only apply if soil fertility is low or targeting maximum yield
+
+ALTERNATIVE FERTILIZERS:
+- NPK 17:17:17: Can replace DAP if available
+- Urea 46:0:0: Can replace CAN but use half the rate (25kg/acre)
+
+ORGANIC FERTILIZER OPTIONS:
+- Well-rotted farmyard manure: 5-10 tons per acre applied 2 weeks before planting
+- Compost: 3-5 tons per acre
+
+==================================================
+SECTION 4: IRRIGATION & WATER MANAGEMENT
+==================================================
+
+WATER REQUIREMENTS:
+- Critical Stages: Tasseling and grain filling (most sensitive to drought)
+- Total Water Needed: 500-800mm throughout growing season
+- Critical Period: 2 weeks before and after tasseling
+
+IRRIGATION SCHEDULE (If available):
+- Week 1-2: Light irrigation to establish seedlings
+- Week 3-6: Moderate irrigation (20-25mm per week)
+- Week 7-10: Heavy irrigation (30-40mm per week) - CRITICAL PERIOD
+- Week 11-14: Reduce irrigation (15-20mm per week)
+- Week 15+: Minimal to no irrigation (grain drying phase)
+
+DRAINAGE:
+- Ensure proper drainage channels to prevent waterlogging
+- Maize cannot tolerate standing water for more than 48 hours
+
+==================================================
+SECTION 5: WEED CONTROL
+==================================================
+
+PRE-EMERGENCE HERBICIDES:
+- Atrazine: Apply within 3 days after planting
+- Rate: 2-3 liters per hectare
+- Cost: 800-1,200 KES per liter
+
+POST-EMERGENCE HERBICIDES:
+- Nicosulfuron: Apply when weeds are 2-4 leaves stage
+- Rate: 40-60g per hectare
+- Cost: 1,500-2,000 KES per sachet
+
+MANUAL WEEDING:
+- First Weeding: 2-3 weeks after emergence
+- Second Weeding: 5-6 weeks after emergence
+- Critical: Keep field weed-free during first 6 weeks
+
+==================================================
+SECTION 6: PEST MANAGEMENT
+==================================================
+
+FALL ARMYWORM (Spodoptera frugiperda):
+- MAJOR THREAT in Kenya since 2017
+- Symptoms: 
+  * Ragged holes in leaves
+  * Sawdust-like frass in leaf whorls
+  * Caterpillars feeding on young leaves
+- Monitoring: Scout fields twice per week from 2 weeks after emergence
+- Control Methods:
+  * Chemical: Emamectin Benzoate (e.g., Escort 19EC) - 10ml per 20L of water
+  * Spray early morning (6-9 AM) or late evening (5-7 PM)
+  * Apply directly into the whorl
+  * Cost: 350-500 KES per 10ml sachet
+  * Repeat every 7-10 days if infestation persists
+- Biological: Release Trichogramma wasps (egg parasitoids)
+- Cultural: Early planting to avoid peak infestation periods
+
+MAIZE STALK BORER (Busseola fusca):
+- Symptoms: Dead heart in young plants, holes in stems
+- Control: 
+  * Chemical: Lambda-cyhalothrin or Chlorpyrifos
+  * Apply when plants are 3-4 weeks old
+  * Push-Pull technology (intercropping with Desmodium)
+
+CUTWORMS:
+- Symptoms: Cut seedlings at soil level at night
+- Control:
+  * Soil application of Dursban or Bulldock at planting
+  * Manual collection at night
+
+APHIDS:
+- Symptoms: Sticky honeydew on leaves, stunted growth
+- Vector for Maize Lethal Necrosis Disease
+- Control: Spray with Imidacloprid or Dimethoate
+
+==================================================
+SECTION 7: DISEASE MANAGEMENT
+==================================================
+
+MAIZE LETHAL NECROSIS (MLN):
+- CRITICAL DISEASE - Can cause 100% yield loss
+- Symptoms:
+  * Chlorotic mottling (yellow streaks) on leaves
+  * Dead heart in young plants
+  * Premature drying and death of plants
+- Transmission: Spread by aphids and thrips
+- Control Measures:
+  * Plant resistant varieties (e.g., KH500-17A, DH04)
+  * Control aphid vectors with insecticides
+  * Practice crop rotation with non-cereal crops (beans, peas)
+  * Remove and destroy infected plants immediately
+  * Use certified disease-free seeds
+  * Early planting to avoid vector population peaks
+- NO CURE: Prevention is critical
+
+GRAY LEAF SPOT (Cercospora zeae-maydis):
+- Symptoms: Rectangular gray-brown lesions on leaves
+- Favorable Conditions: High humidity, warm temperatures
+- Control:
+  * Plant resistant varieties
+  * Fungicide spray: Mancozeb or Azoxystrobin
+  * Crop rotation, proper spacing for air circulation
+
+COMMON RUST (Puccinia sorghi):
+- Symptoms: Reddish-brown pustules on leaves
+- Control: Usually not economically damaging; resistant varieties available
+
+NORTHERN CORN LEAF BLIGHT:
+- Symptoms: Long cigar-shaped lesions on leaves
+- Control: Mancozeb fungicide, resistant varieties
+
+==================================================
+SECTION 8: HARVESTING & POST-HARVEST
+==================================================
+
+HARVEST TIMING:
+- Physiological Maturity: 120-140 days after planting (variety dependent)
+- Signs of Maturity:
+  * Black layer forms at base of kernel (where it attaches to cob)
+  * Husks turn brown and dry
+  * Moisture content drops to 20-25%
+- Optimal Harvest Moisture: Below 18% for safe storage
+- Delay Risks: Pest damage, mold development, lodging
+
+HARVESTING METHOD:
+- Manual: Break cobs from stalk, remove husks
+- Mechanical: Combine harvester (for large farms)
+
+DRYING:
+- Target Moisture: 13-15% for safe storage
+- Sun Drying: Spread cobs on tarpaulin, turn regularly (7-14 days)
+- Mechanical Drying: Faster but more expensive
+- Test Moisture: Bite kernel - should be hard and crack cleanly
+
+SHELLING:
+- Remove kernels from cob when properly dried
+- Shelling Percentage: Expect 75-80% grain from cob weight
+
+STORAGE:
+- Store in dry, well-ventilated place
+- Use hermetic bags (e.g., PICS bags) to prevent weevil damage
+- Traditional: Raised platforms, proper ventilation
+- Chemical Protection: Actellic Super dust (1kg per 90kg bag of grain)
+- Cost of Actellic: 400-600 KES per 1kg
+
+STORAGE PESTS:
+- Maize Weevil: Most common storage pest
+- Larger Grain Borer: Can cause 30-70% loss
+- Control: Hermetic storage, chemical protectants, proper drying
+
+==================================================
+SECTION 9: EXPECTED YIELDS & ECONOMICS
+==================================================
+
+YIELD EXPECTATIONS:
+- Good Management + Hybrid Seed + Adequate Rainfall: 25-35 bags per acre (90kg bags)
+- Average Management: 12-20 bags per acre
+- Poor Management/Drought: 5-10 bags per acre
+
+PRODUCTION COSTS (Per Acre - Approximate):
+- Land Preparation: 3,000-5,000 KES
+- Certified Seed (10kg): 3,500-4,500 KES
+- DAP Fertilizer (50kg): 5,500-6,500 KES
+- CAN Fertilizer (50kg): 4,000-5,000 KES
+- Pesticides: 2,000-4,000 KES
+- Herbicides: 1,500-2,500 KES
+- Labor (planting, weeding, harvesting): 8,000-12,000 KES
+- TOTAL: 27,500-40,000 KES per acre
+
+EXPECTED REVENUE (Per Acre):
+- Average Yield: 18 bags × 3,500 KES/bag = 63,000 KES
+- Good Yield: 30 bags × 3,500 KES/bag = 105,000 KES
+- NET PROFIT (Good Management): 65,000-77,500 KES per acre
+
+MARKET PRICES (Kenya - Variable):
+- Farm Gate: 2,800-3,500 KES per 90kg bag
+- NCPB (Strategic Reserve): 3,200-3,600 KES per 90kg bag
+- Retail: 4,000-5,500 KES per 90kg bag
+
+==================================================
+SECTION 10: COMMON PROBLEMS & SOLUTIONS
+==================================================
+
+PROBLEM: Poor Germination
+- Causes: Old seed, too deep planting, poor soil moisture
+- Solution: Use certified seed, proper depth, ensure adequate moisture
+
+PROBLEM: Stunted Growth / Yellow Leaves
+- Causes: Nitrogen deficiency, waterlogging, pests
+- Solution: Apply CAN fertilizer, improve drainage, check for pests
+
+PROBLEM: Tasseling but No Cobs
+- Causes: Water stress during flowering, high temperatures
+- Solution: Ensure irrigation during critical period, plant drought-tolerant varieties
+
+PROBLEM: Empty Cobs / Poor Grain Filling
+- Causes: Water stress, fall armyworm damage, late fertilizer application
+- Solution: Adequate water during grain filling, pest control, timely top dressing
+
+PROBLEM: Lodging (Plants Falling Over)
+- Causes: Stalk borer damage, strong winds, excessive nitrogen
+- Solution: Control borers, avoid over-fertilization, plant in rows perpendicular to prevailing winds
+
+==================================================
+SECTION 11: CROP ROTATION & INTERCROPPING
+==================================================
+
+RECOMMENDED ROTATION:
+Year 1: Maize
+Year 2: Beans/Peas (legumes fix nitrogen)
+Year 3: Maize
+Benefits: Breaks pest/disease cycles, improves soil fertility
+
+INTERCROPPING OPTIONS:
+- Maize + Beans: Plant beans 2 weeks after maize
+- Push-Pull System: Maize + Desmodium (repels borers) + Napier grass border (traps borers)
+- Benefits: Additional income, pest management, soil health
+
+==================================================
+SECTION 12: CLIMATE & REGIONAL CONSIDERATIONS
+==================================================
+
+MERU REGION SPECIFICS:
+- Altitude: 1,200-2,200m above sea level
+- Optimal for maize production
+- Bimodal rainfall: March-May (long rains), October-December (short rains)
+- Average temperatures: 15-25°C
+- Best varieties: Medium altitude hybrids (H614, DH04, Pannar 413)
+
+DROUGHT MANAGEMENT:
+- Choose drought-tolerant varieties (DH04, KDV1)
+- Early planting to maximize rainfall
+- Mulching to conserve moisture
+- Water harvesting for supplemental irrigation
+
+==================================================
+END OF MANUAL
+==================================================
+Last Updated: January 2025
+For Technical Support: Contact County Agricultural Extension Officers
