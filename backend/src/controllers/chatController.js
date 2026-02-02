@@ -1,9 +1,11 @@
 const axios = require("axios");
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
+const redisClient = require("../config/redisClient");
 
-// read AI URL from .env
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8080";
+
+const CONTEXT_CACHE_TTL = 3600;
 
 const askAI = async (req, res) => {
   try {
@@ -16,64 +18,72 @@ const askAI = async (req, res) => {
         .json({ error: "userId and question are required" });
     }
 
-    // save user message to db
+    // 1. Save user message to db (Write is always real-time)
     await prisma.chatMessage.create({
       data: {
         userId: userId,
         role: 'user',
         content: question,
       }
-    })
+    });
 
-    // fetch last 6 messages for context
+    // 2. Get user farm context from Redis cache or DB
+    const cacheKey = `user:${userId}:farmContext`;
+    let userContext = await redisClient.get(cacheKey);
+
+    if (userContext) {
+      console.log(`[Cache Hit] Using cached context for user ${userId}`);
+    } else {
+      console.log(`[Cache Miss] Fetching fresh context for user ${userId}`);
+
+      // Fetch from Database (The slow part)
+      const farm = await prisma.farm.findFirst({
+        where: { ownerId: userId },
+        include: { 
+          cropCycles: {
+            where: { status: 'planted' },
+            include: { crop: true }
+          }
+        },
+      });
+
+      
+      if (farm) {
+        const cropDetails = farm.cropCycles.map(cycle => {
+          const plantedDate = new Date(cycle.plantingDate).toISOString().split('T')[0];
+          return `${cycle.crop.cropName} (Planted: ${plantedDate})`;
+        }).join(", ");
+
+        userContext = `
+        Location: ${farm.location || "Unknown"}.
+        Farm Name: ${farm.name}.
+        Farm Size: ${farm.size || "Unknown"} acres.
+        Current Active Crops: ${cropDetails || "None"}.
+        `;
+      } else {
+        userContext = "Location: Kenya (General)";
+      }
+
+      // Save to Redis for next time
+      await redisClient.set(cacheKey, userContext, {
+        EX: CONTEXT_CACHE_TTL // Expire after 1 hour
+      });
+    }
+    
     const rawHistory = await prisma.chatMessage.findMany({
       where: { userId: userId },
       orderBy: { createdAt: 'desc' },
       take: 6,
     });
 
-    // reverse so that oldest messages come first
     const chatHistory = rawHistory.reverse().map(msg => ({
       role: msg.role,
       content: msg.content,
     }));
 
-    // fetch user context
-    const farm = await prisma.farm.findFirst({
-      where: { ownerId: userId },
-      include: { 
-        cropCycles: {
-          where: {
-            status: 'planted'
-          },
-          include: {
-            crop: true,
-          }
-        }
-      },
-    });
+    console.log("[Agrotrack] Sending to AI: ", { question, contextLength: userContext.length });
 
-    // if no farm is found, use generic default context
-    let userContext = "Location: Kenya (General)";
-
-    if (farm) {
-      // list of current crops
-      const cropDetails = farm.cropCycles.map(cycle => {
-        const plantedDate = new Date(cycle.plantingDate).toISOString().split('T')[0];
-        return `${cycle.crop.cropName} (Planted: ${plantedDate})`;
-      }).join(", ");
-
-      userContext = `
-      Location: ${farm.location || "Unknown"}.
-      Farm Name: ${farm.name}.
-      Farm Size: ${farm.size || "Unknown"} acres.
-      Current Active Crops: ${cropDetails || "None"}.
-      `;
-    }
-
-    console.log("[Agrotrack] Sending to AI: ", { question, userContext });
-
-    // talk to the python AI Engine
+    // 3. Talk to the Python AI Engine
     const response = await axios.post(`${AI_SERVICE_URL}/ask`, {
       user_id: userId,
       question: question,
@@ -83,7 +93,7 @@ const askAI = async (req, res) => {
 
     const aiAnswer = response.data.answer;
     
-    // save ai message to db
+    // 4. Save AI message to db
     await prisma.chatMessage.create({
       data: {
         userId: userId,
@@ -92,13 +102,12 @@ const askAI = async (req, res) => {
       }
     });
 
-    // send the ai's answer back to frontend
-    return res.status(200).json({ answer: aiAnswer, contextUsed: userContext });
+   
+    return res.status(200).json({ answer: aiAnswer, contextUsed: "Context sent to AI" });
 
   } catch (error) {
     console.error("AI Error: ", error.message);
 
-    // case where python server down
     if (error.code === 'ECONNREFUSED') {
       return res.status(503).json({ error: "AI service is offline" });
     }

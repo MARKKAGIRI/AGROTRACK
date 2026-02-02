@@ -2,6 +2,16 @@ const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 const { validationResult } = require("express-validator");
 
+const clearUserCache = async (userId) => {
+  try {
+    const key = `user:${userId}:farmContext`;
+    await redisClient.del(key);
+    console.log(`[Cache] Invalidated context for user ${userId}`);
+  } catch (err) {
+    console.error("[Cache] Error clearing cache:", err);
+  }
+};
+
 // Get all farms for logged-in user
 const getAllFarms = async (req, res) => {
   try {
@@ -138,6 +148,9 @@ const addFarm = async (req, res) => {
       },
     });
 
+    // invalidate user cache after adding a new farm
+    await clearUserCache(userId);
+
     return res
       .status(201)
       .json({ success: true, message: "Farm created", farm });
@@ -203,6 +216,9 @@ const updateFarm = async (req, res) => {
       },
     });
 
+    // invalidate user cache after updating a farm
+    await clearUserCache(userId);
+
     return res
       .status(200)
       .json({ success: true, message: "Farm updated", farm: updatedFarm });
@@ -229,6 +245,10 @@ const deleteFarm = async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized" });
 
     await prisma.farm.delete({ where: { id: farmId } });
+
+    // invalidate user cache after deleting a farm
+    await clearUserCache(userId);
+    
     return res.status(200).json({ success: true, message: "Farm deleted" });
   } catch (error) {
     console.error("Delete farm error:", error);

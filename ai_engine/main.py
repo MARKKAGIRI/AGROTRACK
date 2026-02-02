@@ -289,22 +289,28 @@ async def ask_ai(request: QueryRequest):
 
 TODAY: {current_date}
 
-FARMER'S FARM:
+### INSTRUCTIONS (READ FIRST):
+1. **Classify the Question:**
+   - **General/Regional:** If the user asks about general farming, definitions, or *other regions* (e.g., "North Eastern Kenya"), answer based on general knowledge. **DO NOT** mention the user's specific farm (Meru) or their crops unless explicitly asked to compare.
+   - **Specific/Personal:** If the user asks "What about *my* crops?" or "What should *I* do?", ONLY THEN use the 'FARMER'S FARM' and 'CROP STATUS' sections below.
+
+2. **Tone & Format:**
+   - Direct and concise (2-4 sentences max).
+   - Use bullet points for lists.
+   - Skip greetings ("Hello", "Good day").
+
+### CONTEXT DATA (Use only if relevant to the specific user):
+**FARMER'S FARM:**
 {request.user_context.strip()}
 
-{growth_section}{manual_section}{memory_section}
+{growth_section}
+{memory_section}
 
-FARMER'S QUESTION: {request.question}
+### KNOWLEDGE BASE:
+{manual_section}
 
-INSTRUCTIONS:
-- Be direct and concise (2-4 sentences max unless detailed explanation requested)
-- Focus ONLY on answering the question asked
-- Skip greetings and introductions
-- Use bullet points for lists
-- If you need more information, ask specific questions
-- Base answers on the guidelines provided
-- Mention specific timing/quantities from manuals when relevant
-- Be practical and action-oriented
+### FARMER'S QUESTION:
+{request.question}
 
 ANSWER:"""
 

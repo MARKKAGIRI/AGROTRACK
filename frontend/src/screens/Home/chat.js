@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
 import { sendMessageToAI } from "../../services/aiApi";
+import AIMarkdown from "../../components/AIMarkdown";
 
 const ChatScreen = ({ navigation }) => {
   const { user, token } = useAuth();
@@ -138,17 +139,20 @@ const ChatScreen = ({ navigation }) => {
   }, [messages, isTyping]);
 
   const renderMessage = ({ item }) => {
-    const isUser = item.sender === "user";
+    const isUser = item.sender === "user"; 
+
     return (
       <View
         className={`flex-row mb-4 ${isUser ? "justify-end" : "justify-start"}`}
       >
+        {/* Avatar */}
         {!isUser && (
           <View className="w-8 h-8 rounded-full bg-[#E8F5E9] items-center justify-center mr-2 border border-green-100">
             <Ionicons name="sparkles" size={16} color="#2E7D32" />
           </View>
         )}
 
+        {/* Message Bubble */}
         <View
           className={`max-w-[80%] p-4 rounded-2xl ${
             isUser
@@ -156,20 +160,26 @@ const ChatScreen = ({ navigation }) => {
               : "bg-white border border-gray-100 rounded-tl-sm shadow-sm"
           }`}
         >
+          
+          {isUser ? (
+            <Text className="text-[15px] leading-5 text-white">
+              {item.text}
+            </Text>
+          ) : (
+            <AIMarkdown content={item.text} />
+          )}
+
           <Text
-            className={`text-[15px] leading-5 ${isUser ? "text-white" : "text-[#1A1C1B]"}`}
-          >
-            {item.text}
-          </Text>
-          <Text
-            className={`text-[10px] mt-2 text-right ${isUser ? "text-green-200" : "text-gray-400"}`}
+            className={`text-[10px] mt-2 text-right ${
+              isUser ? "text-green-200" : "text-gray-400"
+            }`}
           >
             {item.time}
           </Text>
         </View>
       </View>
     );
-  };
+};
 
   return (
     <SafeAreaView className="flex-1 bg-[#FDFDFD]" edges={["top"]}>

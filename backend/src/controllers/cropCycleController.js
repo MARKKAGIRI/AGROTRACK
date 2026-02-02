@@ -2,6 +2,16 @@ const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 const { validationResult } = require("express-validator");
 
+const clearUserCache = async (userId) => {
+  try {
+    const key = `user:${userId}:farmContext`;
+    await redisClient.del(key);
+    console.log(`[Cache] Invalidated context for user ${userId}`);
+  } catch (err) {
+    console.error("[Cache] Error clearing cache:", err);
+  }
+};
+
 // Controller to get all crops for a farm
 const getCrops = async (req, res) => {
   try {
@@ -166,7 +176,10 @@ const addCrop = async (req, res) => {
       },
     });
 
-    res.status(201).json({ 
+    // invalidate user cache after adding a new crop cycle
+    await clearUserCache(userId);
+
+    return res.status(201).json({ 
       success: true,
       message: "Crop cycle added successfully", 
       crop: cropCycle 
@@ -247,6 +260,9 @@ const updateCrop = async (req, res) => {
       },
     });
 
+    // invalidate user cache after updating a crop cycle
+    await clearUserCache(userId);
+
     return res.status(200).json({
       success: true,
       message: "Crop cycle updated successfully",
@@ -302,6 +318,9 @@ const deleteCrop = async (req, res) => {
       where: { id: cropId },
     });
 
+    // invalidate user cache after deleting a crop cycle
+    await clearUserCache(userId);
+    
     return res.status(200).json({
       success: true,
       message: "Crop cycle deleted successfully",
