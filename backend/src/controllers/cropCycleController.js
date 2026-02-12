@@ -138,12 +138,10 @@ const addCrop = async (req, res) => {
     const { farmId } = req.params;
     const userId = req.user.user_id;
 
-    // Check if farm exists and belongs to the user
+    // 1. Check if farm exists and belongs to the user
     const farm = await prisma.farm.findUnique({ where: { id: farmId } });
     if (!farm) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Farm not found" });
+      return res.status(404).json({ success: false, message: "Farm not found" });
     }
     if (farm.ownerId !== userId) {
       return res.status(403).json({
@@ -152,7 +150,7 @@ const addCrop = async (req, res) => {
       });
     }
 
-    // Verify that the crop exists in the Crops table
+    // 2. Verify that the crop exists in the Crops table
     const cropExists = await prisma.crops.findUnique({
       where: { id: parseInt(cropId) },
     });
@@ -163,27 +161,67 @@ const addCrop = async (req, res) => {
       });
     }
 
+    // 3. Create the Crop Cycle
     const cropCycle = await prisma.cropCycle.create({
       data: {
         farmId,
         cropId: parseInt(cropId),
         plantingDate: new Date(plantingDate),
         harvestDate: harvestDate ? new Date(harvestDate) : null,
-        status: status || "plantend",
+        status: status || "planted", // Fixed typo "plantend" -> "planted"
       },
       include: {
-        crop: true, // Return crop details
+        crop: true, // This fetches the growthData JSON
       },
     });
 
-    // invalidate user cache after adding a new crop cycle
+    // Auto-Generate Tasks 
+    const growthData = cropCycle.crop?.growthData;
+
+    if (growthData && growthData.growthStages && Array.isArray(growthData.growthStages)) {
+      const tasksToCreate = [];
+      
+      // Initialize a running date counter starting at planting date
+      let currentStageDate = new Date(plantingDate);
+
+      growthData.growthStages.forEach((stage) => {
+        // Parse duration (e.g., "7-10 days" -> 7). 
+        // We use parseInt which stops at the first non-digit char.
+        const duration = parseInt(stage.durationDays) || 7; 
+
+        // Add all tasks for this stage
+        if (stage.tasks && Array.isArray(stage.tasks)) {
+          stage.tasks.forEach((taskTitle) => {
+            tasksToCreate.push({
+              cropCycleId: cropCycle.id,
+              title: taskTitle,
+              type: "Field Work", 
+              description: `Growth Stage: ${stage.stage}`,
+              date: new Date(currentStageDate), // Assign to the start of this stage
+              status: "pending",
+            });
+          });
+        }
+
+        currentStageDate.setDate(currentStageDate.getDate() + duration);
+      });
+
+      if (tasksToCreate.length > 0) {
+        await prisma.task.createMany({
+          data: tasksToCreate,
+        });
+        console.log(`Auto-generated ${tasksToCreate.length} tasks for cycle ${cropCycle.id}`);
+      }
+    }
+    
     await clearUserCache(userId);
 
     return res.status(201).json({ 
       success: true,
-      message: "Crop cycle added successfully", 
+      message: "Crop cycle added and tasks generated successfully", 
       crop: cropCycle 
     });
+
   } catch (error) {
     console.error("Add crop error:", error);
     res.status(500).json({ 

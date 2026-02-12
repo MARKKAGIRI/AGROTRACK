@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -11,15 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../context/AuthContext";
+import SectionHeader from "../../components/SectionHeader";
 
-const SectionHeader = ({ title, action }) => (
-  <View className="flex-row justify-between items-center mb-4">
-    <Text className="text-xl font-bold text-[#1A1C1B]">{title}</Text>
-    <TouchableOpacity>
-      <Text className="text-[#2E7D32] font-semibold text-sm">{action}</Text>
-    </TouchableOpacity>
-  </View>
-);
+
 
 const FarmCard = ({
   farmName,

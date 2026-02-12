@@ -10,7 +10,9 @@ import {
   ActivityIndicator,
   StatusBar,
   Keyboard,
+  Image
 } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useAuth } from "../../context/AuthContext";
@@ -35,6 +37,8 @@ const ChatScreen = ({ navigation }) => {
       }),
     },
   ]);
+
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const [dotAnim1] = useState(new Animated.Value(0));
   const [dotAnim2] = useState(new Animated.Value(0));
@@ -96,15 +100,27 @@ const ChatScreen = ({ navigation }) => {
     };
   }, []);
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7
+    });
+
+    if(!result.canceled){
+      setSelectedImage(result.assets[0].uri)
+    }
+  }
+
   // --- Handlers ---
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !selectedImage) return;
 
     const userMsg = {
       id: Date.now().toString(),
       sender: "user",
       text: input.trim(),
+      image: selectedImage,
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -112,10 +128,13 @@ const ChatScreen = ({ navigation }) => {
     };
 
     setMessages((prev) => [...prev, userMsg]);
+
+    const imageToSend = selectedImage;
+    setSelectedImage(null);
     setInput("");
     setIsTyping(true);
 
-    const response = await sendMessageToAI(user.user_id, userMsg.text, token);
+    const response = await sendMessageToAI(user.user_id, userMsg.text, imageToSend, token);
 
     const botMsg = {
       id: (Date.now() + 1).toString(),
@@ -160,6 +179,13 @@ const ChatScreen = ({ navigation }) => {
               : "bg-white border border-gray-100 rounded-tl-sm shadow-sm"
           }`}
         >
+          {item.image && (
+            <Image 
+              source={{ uri: item.image }} 
+              className="w-48 h-48 rounded-lg mb-2 bg-gray-200"
+              resizeMode="cover"
+            />
+          )}
           
           {isUser ? (
             <Text className="text-[15px] leading-5 text-white">
@@ -269,42 +295,62 @@ const ChatScreen = ({ navigation }) => {
 
         {/* Input Area with dynamic bottom padding based on keyboard height */}
         <View
-          className="p-4 bg-white border-t border-gray-100 flex-row items-center"
+          className="bg-white border-t border-gray-100"
           style={{
-            paddingBottom:
-              Platform.OS === "android" ? (keyboardHeight > 0 ? 16 : 16) : 16,
+            paddingBottom: Platform.OS === "android" ? (keyboardHeight > 0 ? 16 : 16) : 16,
             marginBottom: Platform.OS === "android" ? keyboardHeight : 0,
+            padding: 16
           }}
         >
-          <TouchableOpacity className="mr-3 p-2 bg-gray-50 rounded-full">
-            <Feather name="plus" size={20} color="#6B7280" />
-          </TouchableOpacity>
+          {/* PREVIEW: Show selected image before sending */}
+          {selectedImage && (
+            <View className="mb-3 flex-row">
+              <View className="relative">
+                <Image 
+                  source={{ uri: selectedImage }} 
+                  className="w-16 h-16 rounded-lg border border-gray-200" 
+                />
+                <TouchableOpacity 
+                  onPress={() => setSelectedImage(null)}
+                  className="absolute -top-2 -right-2 bg-red-500 rounded-full w-5 h-5 items-center justify-center border border-white"
+                >
+                  <Feather name="x" size={12} color="white" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
 
-          <View className="flex-1 bg-[#F3F4F6] rounded-full px-4 py-3 flex-row items-center border border-transparent">
-            <TextInput
-              value={input}
-              onChangeText={setInput}
-              placeholder="Ask about your crops..."
-              placeholderTextColor="#9CA3AF"
-              className="flex-1 text-[#1A1C1B] text-base max-h-20"
-              multiline
-              onFocus={() => {
-                setTimeout(() => {
-                  flatListRef.current?.scrollToEnd({ animated: true });
-                }, 300);
-              }}
-            />
+          <View className="flex-row items-center">
+            {/* UPDATED: Plus button now opens Image Picker */}
+            <TouchableOpacity 
+              onPress={pickImage} 
+              className="mr-3 p-2 bg-gray-50 rounded-full border border-gray-100"
+            >
+              <Feather name="image" size={20} color="#6B7280" />
+            </TouchableOpacity>
+
+            <View className="flex-1 bg-[#F3F4F6] rounded-full px-4 py-3 flex-row items-center border border-transparent">
+              <TextInput
+                value={input}
+                onChangeText={setInput}
+                placeholder={selectedImage ? "Add a caption..." : "Ask about your crops..."}
+                placeholderTextColor="#9CA3AF"
+                className="flex-1 text-[#1A1C1B] text-base max-h-20"
+                multiline
+                onFocus={() => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 300)}
+              />
+            </View>
+
+            <TouchableOpacity
+              onPress={handleSend}
+              disabled={!input.trim() && !selectedImage} // Enable if image exists
+              className={`ml-3 w-12 h-12 rounded-full items-center justify-center shadow-sm ${
+                (input.trim() || selectedImage) ? "bg-[#2E7D32]" : "bg-gray-200"
+              }`}
+            >
+              <Ionicons name="send" size={20} color="white" />
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            onPress={handleSend}
-            disabled={!input.trim()}
-            className={`ml-3 w-12 h-12 rounded-full items-center justify-center shadow-sm ${
-              input.trim() ? "bg-[#2E7D32]" : "bg-gray-200"
-            }`}
-          >
-            <Ionicons name="send" size={20} color="white" />
-          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>

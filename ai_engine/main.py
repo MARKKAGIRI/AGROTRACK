@@ -1,4 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from typing import Optional
+import shutil
+from ultralytics import YOLO
 from pydantic import BaseModel
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -13,6 +16,8 @@ import re
 load_dotenv()
 
 app = FastAPI()
+
+vision_model = YOLO("my_crop_model.pt")
 
 # Global AI components
 embeddings = None 
@@ -255,62 +260,111 @@ class QueryRequest(BaseModel):
     user_context: str = ""
 
 @app.post("/ask")
-async def ask_ai(request: QueryRequest):
+async def ask_ai(
+    user_id: str = Form(...),
+    question: str = Form(...),
+    user_context: str = Form(...),
+    image: Optional[UploadFile] = File(None)
+):
     if not llm:
         raise HTTPException(status_code=503, detail="AI System not ready.")
 
     try:
         # Get current date
         current_date = datetime.now().strftime("%B %d, %Y")
+
+        # --- STEP 1: VISION PROCESSING (New) ---
+        vision_section = ""
         
-        # Extract crop information
-        crops = extract_crop_info(request.user_context)
+        if image:
+            # Save temp file
+            temp_filename = f"temp_{image.filename}"
+            with open(temp_filename, "wb") as buffer:
+                shutil.copyfileobj(image.file, buffer)
+            
+            try:
+                # Run YOLO Inference
+                results = vision_model(temp_filename)
+                
+                # Extract all predictions with confidence scores
+                if results[0].probs is not None:
+                    # Get top predictions
+                    probs = results[0].probs.data.cpu().numpy()
+                    names = results[0].names
+                    
+                    # Get top 3 predictions
+                    top_indices = sorted(range(len(probs)), key=lambda i: probs[i], reverse=True)[:3]
+                    
+                    top_predictions = []
+                    for idx in top_indices:
+                        disease = names[idx]
+                        score = probs[idx]
+                        if score > 0.1:  # Only include predictions > 10%
+                            top_predictions.append(f"  - {disease} ({score:.1%})")
+                    
+                    if top_predictions:
+                        predictions_text = "\n".join(top_predictions)
+                        vision_section = f"""
+Based on visual analysis of the uploaded image, here are possible issues:
+{predictions_text}
+
+Provide treatment advice for the most likely condition, and mention prevention tips for the other possibilities.
+"""
+                    else:
+                        vision_section = ""
+                else:
+                    vision_section = ""
+                    
+            except Exception as e:
+                print(f"Vision Error: {e}")
+                vision_section = ""
+            finally:
+                # Clean up temp file
+                if os.path.exists(temp_filename):
+                    os.remove(temp_filename)
+        # ---------------------------------------
+
+        # --- STEP 2: STANDARD CONTEXT RETRIEVAL ---
+        # (Your existing logic)
+        crops = extract_crop_info(user_context)
         growth_stage_info = get_growth_stage_info(crops)
         
-        # Get relevant manual context
         manual_context = get_relevant_manual_context(
-            request.question, 
-            request.user_context, 
+            question, 
+            user_context, 
             k=4
         )
         
-        # Get conversation history
-        memory_context = get_conversation_history(request.user_id, request.question, k=2)
+        memory_context = get_conversation_history(user_id, question, k=2)
         
-        # Build dynamic prompt sections
+        # Build prompt sections
         manual_section = f"RELEVANT GUIDELINES:\n{manual_context}\n" if manual_context else ""
-        
         growth_section = f"CURRENT CROP STATUS:\n{growth_stage_info}\n" if growth_stage_info else ""
-        
         memory_section = f"RECENT CONVERSATION:\n{memory_context}\n" if memory_context else ""
-        
-        # Construct prompt
+
+        # --- STEP 3: CONSTRUCT PROMPT ---
         prompt = f"""You are AgroAI, a helpful agricultural assistant for Kenyan farmers using Agrotrack.
 
 TODAY: {current_date}
 
-### INSTRUCTIONS (READ FIRST):
-1. **Classify the Question:**
-   - **General/Regional:** If the user asks about general farming, definitions, or *other regions* (e.g., "North Eastern Kenya"), answer based on general knowledge. **DO NOT** mention the user's specific farm (Meru) or their crops unless explicitly asked to compare.
-   - **Specific/Personal:** If the user asks "What about *my* crops?" or "What should *I* do?", ONLY THEN use the 'FARMER'S FARM' and 'CROP STATUS' sections below.
+### INSTRUCTIONS:
+1. **Answer only what the user asked** - stay on topic, don't add unnecessary information.
+2. **If an image was uploaded with visual analysis** - focus on diagnosing and treating the crop issue shown.
+3. **Tone:** Direct, concise, practical. No greetings or classifications unless asked.
 
-2. **Tone & Format:**
-   - Direct and concise (2-4 sentences max).
-   - Use bullet points for lists.
-   - Skip greetings ("Hello", "Good day").
+### FARMER'S QUESTION:
+{question}
 
-### CONTEXT DATA (Use only if relevant to the specific user):
+### CONTEXT DATA:
 **FARMER'S FARM:**
-{request.user_context.strip()}
+{user_context.strip()}
 
 {growth_section}
 {memory_section}
+{vision_section}
 
 ### KNOWLEDGE BASE:
 {manual_section}
-
-### FARMER'S QUESTION:
-{request.question}
 
 ANSWER:"""
 
@@ -318,24 +372,25 @@ ANSWER:"""
         response = llm.invoke(prompt)
         answer_text = response.content.strip()
         
-        # Clean up response
+        # Clean up response (Your existing regex)
         answer_text = re.sub(r'^(Good day|Hello|Hi),?\s*(Farmer|friend).*?\.', '', answer_text, flags=re.IGNORECASE)
         answer_text = re.sub(r"I'm AgroAI.*?\.", '', answer_text, flags=re.IGNORECASE)
         answer_text = answer_text.strip()
         
-        # Save to memory (condensed)
+        # Save to memory
         if embeddings:
-            interaction = f"Q: {request.question}\nA: {answer_text[:250]}"
-            user_memory_db = get_user_memory(request.user_id)
+            # Save both the question and the response, including vision analysis
+            interaction = f"Q: {question} [Image: {'Yes' if image else 'No'}]\nA: {answer_text[:250]}"
+            user_memory_db = get_user_memory(user_id)
             user_memory_db.add_texts([interaction])
-            save_user_memory(request.user_id, user_memory_db)
+            save_user_memory(user_id, user_memory_db)
         
         return {"answer": answer_text}
 
     except Exception as e:
         print(f"Error processing request: {e}")
-        return {"answer": "I'm having trouble right now. Could you rephrase your question?"}
-
+        return {"answer": "I'm having trouble analyzing that right now. Could you try again?"}
+    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

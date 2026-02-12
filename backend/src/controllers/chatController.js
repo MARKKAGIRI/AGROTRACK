@@ -2,6 +2,8 @@ const axios = require("axios");
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 const redisClient = require("../config/redisClient");
+const FormData = require("form-data");
+const fs = require("fs");
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8080";
 
@@ -10,6 +12,7 @@ const CONTEXT_CACHE_TTL = 3600;
 const askAI = async (req, res) => {
   try {
     const { userId, question } = req.body;
+    const imageFile = req.file;
 
     // Validate input
     if (!userId || !question) {
@@ -23,7 +26,7 @@ const askAI = async (req, res) => {
       data: {
         userId: userId,
         role: 'user',
-        content: question,
+        content: question || (imageFile ? "Analyze this image" : "Hello"),
       }
     });
 
@@ -47,7 +50,6 @@ const askAI = async (req, res) => {
         },
       });
 
-      
       if (farm) {
         const cropDetails = farm.cropCycles.map(cycle => {
           const plantedDate = new Date(cycle.plantingDate).toISOString().split('T')[0];
@@ -69,7 +71,8 @@ const askAI = async (req, res) => {
         EX: CONTEXT_CACHE_TTL // Expire after 1 hour
       });
     }
-    
+
+    // Get chat history (always fresh)
     const rawHistory = await prisma.chatMessage.findMany({
       where: { userId: userId },
       orderBy: { createdAt: 'desc' },
@@ -81,14 +84,25 @@ const askAI = async (req, res) => {
       content: msg.content,
     }));
 
-    console.log("[Agrotrack] Sending to AI: ", { question, contextLength: userContext.length });
+    // Form data for python
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    formData.append('question', question);
+    formData.append('user_context', userContext || "What is wrong with this crop?");
+    formData.append('chat_history', JSON.stringify(chatHistory));
+
+    if (imageFile) {
+      formData.append('image', imageFile.buffer, {
+        filename: imageFile.originalname || 'upload.jpg',
+        contentType: imageFile.mimetype || 'image/jpeg'
+      });
+    }
+
+    console.log("[Agrotrack] Sending to AI: ", { question, contextLength: userContext.length, imageFile: imageFile ? "Yes" : "No" });
 
     // 3. Talk to the Python AI Engine
-    const response = await axios.post(`${AI_SERVICE_URL}/ask`, {
-      user_id: userId,
-      question: question,
-      user_context: userContext,
-      chatHistory: chatHistory,
+    const response = await axios.post(`${AI_SERVICE_URL}/ask`, formData, {
+      headers: {...formData.getHeaders()}
     });
 
     const aiAnswer = response.data.answer;
@@ -101,7 +115,6 @@ const askAI = async (req, res) => {
         content: aiAnswer,
       }
     });
-
    
     return res.status(200).json({ answer: aiAnswer, contextUsed: "Context sent to AI" });
 

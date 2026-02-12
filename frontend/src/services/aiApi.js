@@ -2,19 +2,32 @@ import axios from "axios";
 import { API_URL } from "@env";
 
 
-export const sendMessageToAI = async (userId, question, token) => {
+export const sendMessageToAI = async (userId, question, image, token) => {
   try {
     console.log("Sending message to AI:", question);
+    console.log("Image attached: ", image? "Yes" : "no");
     console.log("For User ID:", userId);
+
+    const formData = new FormData();
+    formData.append("userId", userId)
+
+    // incase question is empty (users sends only an image)
+    formData.append("question", question || "Analyze this image");
+
+    if(image) {
+      formData.append("image", {
+        uri: image,
+        name: "upload.jpg",
+        type: "image/jpeg",
+      });
+    }
+    
     const response = await axios.post(
       `${API_URL}/chat`,
-      {
-        userId: userId,
-        question: question,
-      },
+      formData,
       {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`, 
         },
       }
