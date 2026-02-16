@@ -21,6 +21,7 @@ app.use('/api/revenues', require('./routes/revenueRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/weather', require('./routes/weatherRoutes'));
 app.use("/api/crops", require("./routes/cropRoutes"));
+app.use("/api/images", require('./routes/imageRoutes'))
 
 // ai chat routes
 app.use("/api", require("./routes/chatRoutes"));

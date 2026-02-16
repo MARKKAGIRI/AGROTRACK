@@ -71,6 +71,7 @@ const login = async (req, res) => {
         phone: user.phone,
         email: user.email,
         role: user.role,
+        profilePicture: user.profilePicture,
         ...(user.dob && { dob: user.dob }),
       },
     });

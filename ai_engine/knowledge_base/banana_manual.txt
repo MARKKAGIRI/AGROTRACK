@@ -1,0 +1,385 @@
+AGROTRACK GUIDE: BANANA FARMING (KENYA)
+
+==================================================
+SECTION 1: VARIETY SELECTION
+==================================================
+
+COOKING BANANAS (PLANTAINS):
+- Matoke varieties: Most common in Western Kenya
+- Mbidde: Large bunches, good for cooking
+- Mpologoma: Sweet cooking banana
+- Musa Paradisiaca: Traditional plantain
+
+DESSERT BANANAS (SWEET):
+- Williams/Cavendish: Commercial variety, export quality
+- Grand Nain: High yielding, disease susceptible
+- FHIA varieties (FHIA 17, FHIA 23): Resistant to Black Sigatoka
+- Apple Banana: Sweet, good for local market
+- Dwarf Cavendish: Suitable for small-scale, 2-2.5m height
+
+DUAL PURPOSE:
+- Sukali Ndiizi: Sweet when ripe, can cook when green
+- Bokoboko: Popular in Central and Nyanza
+
+TISSUE CULTURE vs SUCKERS:
+- Tissue culture: Disease-free, uniform, faster maturity, expensive
+- Suckers: Cheaper, may carry diseases, variable quality
+- Always use certified planting material
+
+==================================================
+SECTION 2: SOIL & SITE REQUIREMENTS
+==================================================
+
+SOIL REQUIREMENTS:
+- Deep, well-drained loamy soils (1m+ depth)
+- pH: 5.5-7.0 (slightly acidic to neutral)
+- Rich in organic matter
+- Avoid waterlogged or sandy soils
+
+CLIMATE:
+- Altitude: 1,000-2,000m above sea level
+- Temperature: 20-30°C (optimum 27°C)
+- Rainfall: 1,000-2,000mm well distributed
+- Avoid areas with strong winds
+
+BEST REGIONS IN KENYA:
+- Western: Kakamega, Bungoma, Busia
+- Nyanza: Kisii, Kisumu, Homa Bay
+- Central: Muranga, Nyeri (lower zones)
+- Coast: Kilifi, Kwale, Taita Taveta
+
+==================================================
+SECTION 3: LAND PREPARATION & PLANTING
+==================================================
+
+LAND PREPARATION:
+- Clear land of weeds and debris
+- Deep ploughing (30cm minimum)
+- Dig planting holes: 60cm × 60cm × 60cm
+- Fill holes with topsoil mixed with 20kg well-decomposed manure
+
+SPACING:
+- High-density: 2m × 2m (1,089 plants per acre)
+- Medium-density: 2.5m × 2.5m (696 plants per acre)
+- Low-density: 3m × 3m (484 plants per acre)
+- Recommended: 2.5m × 2.5m for good management
+
+PLANTING TIME:
+- Beginning of rainy season (optimal)
+- Long rains: March-April
+- Short rains: October-November
+- Can plant year-round with irrigation
+
+PLANTING PROCEDURE:
+- Use tissue culture plantlets or healthy sword suckers (1-1.5m tall)
+- Remove all roots and trim to white tissue
+- Treat with hot water (55°C for 10 minutes) to kill pests
+- Plant at same depth as in nursery
+- Firm soil around plant and water thoroughly
+- Mulch with banana trash or other organic matter
+
+==================================================
+SECTION 4: FERTILIZER APPLICATION
+==================================================
+
+PLANTING FERTILIZER:
+- 20-30kg well-decomposed manure per hole
+- 200g TSP (Triple Super Phosphate) per hole
+- Mix thoroughly with topsoil
+
+YEAR 1 (ESTABLISHMENT):
+- Month 1: 50g CAN per plant
+- Month 3: 100g CAN per plant
+- Month 6: 100g CAN + 50g NPK 17:17:17
+- Month 9: 100g CAN per plant
+
+YEAR 2 ONWARDS (MATURE PLANTATION):
+- Every 3 months: 200g CAN per mat
+- Every 6 months: 150g NPK 17:17:17 per mat
+- Annual manure: 20kg per mat
+- Apply in ring around plant, 30cm from pseudostem
+
+MICRONUTRIENTS:
+- Foliar spray with zinc and boron
+- Important for bunch development
+- Apply monthly during flowering
+
+ORGANIC OPTIONS:
+- 30-50kg well-decomposed manure per mat per year
+- Compost from banana trash
+- Coffee husks (in coffee-banana systems)
+- Green manure from cover crops
+
+==================================================
+SECTION 5: IRRIGATION & WATER MANAGEMENT
+==================================================
+
+WATER REQUIREMENTS:
+- Bananas need 25-30mm water per week
+- Critical periods: Flowering and bunch development
+- Susceptible to both drought and waterlogging
+
+IRRIGATION METHODS:
+- Drip irrigation: Most efficient
+- Furrow irrigation: Common but water-intensive
+- Basin irrigation: For small-scale
+- Mulching: Conserves moisture significantly
+
+IRRIGATION SCHEDULE:
+- Dry season: Irrigate 2-3 times per week
+- Young plants: More frequent light irrigation
+- Mature plants: Deep watering less frequently
+
+DRAINAGE:
+- Dig trenches in waterlogged areas
+- Raise beds in heavy soils
+- Ensure good surface drainage
+
+==================================================
+SECTION 6: DESUCKERING & MAT MANAGEMENT
+==================================================
+
+DESUCKERING (CRITICAL PRACTICE):
+- Keep only 3 stems per mat: 
+  * Mother (bearing)
+  * Follower (will fruit next)
+  * Sword sucker (replacement)
+- Remove all other suckers every 6-8 weeks
+- Cut suckers at ground level using sharp panga
+- Remove completely to prevent regrowth
+
+WHY DESUCKERING IS IMPORTANT:
+- Prevents overcrowding
+- Better bunch size and quality
+- Easier pest and disease management
+- Optimal use of nutrients and water
+- Allows air circulation
+
+SUCKER SELECTION:
+- Choose strong sword suckers (narrow leaves)
+- Water suckers (broad leaves) produce smaller bunches
+- Position: Select suckers away from parent plant
+
+==================================================
+SECTION 7: PEST & DISEASE MANAGEMENT
+==================================================
+
+MAJOR PESTS:
+- Banana Weevil (Cosmopolites): Most serious pest, bores into corm
+  Control: Use pheromone traps, clean planting material, remove trash
+  Chemical: Apply Chlorpyrifos granules at base
+- Nematodes: Cause toppling, reduced yield
+  Control: Use tissue culture, crop rotation, soil fumigation
+- Banana Aphid: Transmit banana bunchy top virus
+  Control: Remove infected plants, control aphids with insecticides
+
+MAJOR DISEASES:
+- Fusarium Wilt (Panama Disease): Most serious, vascular wilting, no cure
+  Control: Use resistant varieties (FHIA), destroy infected plants, quarantine
+- Black Sigatoka: Black streaks on leaves, premature leaf death
+  Control: Remove affected leaves, spray with fungicides (Propiconazole)
+  Cultural: Good spacing, drainage, desuckering
+- Yellow Sigatoka: Similar to Black but less severe
+  Control: Remove affected leaves, fungicide sprays
+- Banana Bunchy Top Virus (BBTV): Stunting, bunchy leaves
+  Control: Remove infected plants immediately, control aphids
+- Bacterial Wilt (Xanthomonas): Wilting, premature ripening, bacterial ooze
+  Control: Use clean tools (sterilize with fire/disinfectant)
+  Remove infected plants and suckers within 50m radius
+
+INTEGRATED MANAGEMENT:
+- Plant disease-free material
+- Regular field scouting
+- Remove diseased plants immediately
+- Maintain good sanitation (remove dead leaves)
+- Disinfect farm tools between plants
+- Proper spacing for air circulation
+
+==================================================
+SECTION 8: SUPPORTING & PROPPING
+==================================================
+
+WHY SUPPORT IS NEEDED:
+- Prevent toppling due to heavy bunches
+- Wind damage prevention
+- Shallow root system
+
+PROPPING METHODS:
+- Single pole prop: One strong pole against plant
+- Forked prop: Y-shaped support under bunch
+- Double prop: Two poles on opposite sides
+- Cable/wire support: For large plantations
+
+TIMING:
+- Install props when bunch emerges
+- Before fruit starts gaining weight
+- Adjust as bunch develops
+
+==================================================
+SECTION 9: HARVESTING & POST-HARVEST
+==================================================
+
+TIME TO HARVEST:
+- First harvest: 9-12 months for tissue culture
+- First harvest: 12-15 months for suckers
+- Subsequent harvests: Every 8-10 months
+
+MATURITY INDICATORS:
+- Fruits well-filled (fingers rounded, not angular)
+- Flowers at finger tips dry and easily rubbed off
+- Change in fruit color (green becomes lighter)
+- 75-80% mature for export/long storage
+- 90-100% mature for local market
+
+HARVESTING PROCEDURE:
+- Use sharp panga or knife
+- Cut bunch with one clean stroke
+- Cushion bunch fall with banana leaf or padding
+- Leave 30cm of stalk attached to bunch
+- Harvest in morning (cooler temperature)
+
+DEHANDING:
+- Separate hands from stalk
+- Use clean, sharp knife
+- Dip hands in clean water
+- Grade by size and quality
+
+POST-HARVEST HANDLING:
+- Avoid bruising and cuts
+- Wash fruits in clean water
+- Treat with fungicide solution (optional)
+- Dry in shade
+- Pack in ventilated crates or cartons
+
+RIPENING:
+- Natural ripening: 5-7 days at room temperature
+- Artificial ripening: Ethylene gas in ripening chambers
+- Cooking bananas: Ripen in closed container with ripe fruits
+
+STORAGE:
+- Green bananas: 2-4 weeks at 13-15°C
+- Ripe bananas: 5-7 days at room temperature
+- Do not refrigerate (causes blackening)
+
+==================================================
+SECTION 10: YIELD & ECONOMICS
+==================================================
+
+EXPECTED YIELD:
+- First ratoon: 15-25 tons per acre per year
+- Mature plantation: 25-40 tons per acre per year
+- Tissue culture: Higher yields than suckers
+- Good management: Up to 50 tons per acre
+
+BUNCH WEIGHT:
+- Plantain: 20-40kg per bunch
+- Dessert banana: 15-30kg per bunch
+
+MARKET PRICES (Seasonal variation):
+- Cooking bananas: 30-60 KES per kg
+- Dessert bananas: 40-80 KES per kg
+- Export quality: 100-150 KES per kg
+
+INCOME POTENTIAL:
+- 30 tons × 50 KES = 1,500,000 KES per acre per year
+- Continuous production throughout the year
+
+PRODUCTION COSTS PER ACRE (ANNUAL):
+- Planting material: 150,000-250,000 KES (one-time, tissue culture)
+- Fertilizers: 60,000-80,000 KES
+- Pesticides: 30,000-50,000 KES
+- Labor: 100,000-150,000 KES
+- Other costs: 30,000 KES
+- Total (excluding planting): 220,000-310,000 KES
+
+NET PROFIT (After establishment):
+- 1,200,000-1,300,000 KES per acre per year
+- Higher for export quality
+
+==================================================
+SECTION 11: INTERCROPPING & AGROFORESTRY
+==================================================
+
+SUITABLE INTERCROPS:
+- Coffee: Classic combination in Central Kenya
+- Beans: Between rows (short-term)
+- Yams/Cassava: Compatible root crops
+- Passion fruit: Can use banana stems as support
+- Vegetables: Lettuce, spinach, tomatoes (in shade)
+- Napier grass: For livestock feed on borders
+
+SPACING FOR INTERCROPPING:
+- Plant bananas at wider spacing (3m × 3m)
+- Allows space for intercrops
+- Reduces competition
+
+BENEFITS:
+- Additional income
+- Soil cover and erosion control
+- Efficient land use
+- Risk diversification
+
+AVOID:
+- Heavy feeders like maize (compete for nutrients)
+- Tall crops that shade bananas
+- Crops that harbor banana pests
+
+==================================================
+SECTION 12: VALUE ADDITION & MARKETS
+==================================================
+
+VALUE ADDITION:
+- Banana flour: From green cooking bananas
+- Banana chips: Fried or baked snacks
+- Banana juice/wine: From ripe dessert bananas
+- Dried bananas: Long shelf life
+- Baby food: Pureed ripe bananas
+
+FRESH MARKET:
+- Local markets: Bulk buyers, retailers
+- Supermarkets: Require consistent quality and supply
+- Hotels and restaurants
+- Direct sales to consumers
+- Roadside sales
+
+EXPORT MARKETS:
+- European Union: Strict quality standards
+- Middle East: Growing demand
+- Requires GlobalGAP certification
+- Consistent supply critical
+
+PROCESSING:
+- Contract with processing companies
+- Banana flour factories
+- Juice processors
+
+==================================================
+SECTION 13: SPECIAL CONSIDERATIONS
+==================================================
+
+CLIMATE CHANGE ADAPTATION:
+- Use drought-tolerant varieties
+- Mulching heavily (10-15cm layer)
+- Rainwater harvesting
+- Drip irrigation installation
+
+ORGANIC PRODUCTION:
+- Use only organic fertilizers (manure, compost)
+- Biological pest control
+- Neem-based pesticides
+- Higher market prices (30-50% premium)
+
+CERTIFICATION:
+- GlobalGAP for export
+- Kenya Organic Agriculture Network (KOAN)
+- Fairtrade certification
+
+BANANA CYCLE MANAGEMENT:
+- Replace old plantations after 5-7 years
+- Rejuvenate with tissue culture plantlets
+- Soil improvement before replanting
+- Prevents pest and disease buildup
+
+==================================================
+END OF MANUAL
+==================================================

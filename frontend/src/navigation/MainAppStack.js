@@ -15,6 +15,7 @@ import HelpSupport from "../screens/Profile/HelpSupport";
 import About from "../screens/Profile/About";
 import CropCycleScreen from "../screens/Lifecycle/CropCycle";
 import AnalyticsScreen from "../screens/Analytics/Analytics";
+import ChatHistoryScreen from "../screens/Home/ChatHistoryScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -92,6 +93,14 @@ export default function MainAppStack() {
       />
 
       <Stack.Screen
+        name="Chathistory"
+        component={ChatHistoryScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
         name="UpdateProfile"
         component={UpdateProfileScreen}
         options={{
@@ -142,7 +151,12 @@ export default function MainAppStack() {
         name="CropCycle"
         component={CropCycleScreen}
         options={{
-          headerShown: false,
+          title: "CropCycle",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32", 
+          },
         }}
       />
       

@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import ProfileAvatar from '../../components/ProfileAvatar';
 
 const Profile = () => {
   const { user, token, logout } = useAuth();
@@ -20,7 +21,6 @@ const Profile = () => {
           style: 'destructive',
           onPress: () => {
             logout();
-            // navigation.navigate('Login'); // Uncomment if needed
           },
         },
       ]
@@ -82,13 +82,8 @@ const Profile = () => {
       <ScrollView contentContainerClassName="p-4 pb-8">
         {/* Profile Header */}
         <View className="items-center mb-5 bg-gradient-to-br from-[#d0e8d6] to-[#e8f5e9] p-6 rounded-2xl w-full shadow-sm">
-          <View className="relative">
-            <View
-              className="w-24 h-24 rounded-full border-4 bg-[#388e3c] mb-3"
-            />
-            <TouchableOpacity className="absolute bottom-2 right-0 bg-[#388e3c] w-8 h-8 rounded-full items-center justify-center border-2 border-white">
-              <Icon name="camera" size={16} color="#fff" />
-            </TouchableOpacity>
+          <View className="mb-3">
+            <ProfileAvatar />
           </View>
           <Text className="text-2xl font-bold text-[#222] mb-1">
             {token != null ? user.name : "John Doe"}

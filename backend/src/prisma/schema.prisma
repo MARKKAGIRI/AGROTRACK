@@ -17,6 +17,7 @@ model User {
   role          String         @default("user")
   location      String?
   phoneNumber   String?
+  profilePicture String?
   createdAt     DateTime       @default(now())
 
   farms         Farm[]
@@ -34,6 +35,7 @@ model Farm {
   location    String
   latitude    Float?
   longitude   Float?
+  images      String[]
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
@@ -176,6 +178,7 @@ model ChatMessage {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  sessionId String  
   role      String   // "user" or "assistant"
   content   String   // The actual message text
   createdAt DateTime @default(now())

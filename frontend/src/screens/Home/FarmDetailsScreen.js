@@ -5,70 +5,70 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
-  ImageBackground,
   ActivityIndicator,
-  Image,
+  RefreshControl,
+  Modal,
+  Alert
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { getSatelliteDataDirectly } from "../../services/FarmService";
 const { useRoute } = require("@react-navigation/native");
 import { useAuth } from "../../context/AuthContext";
-import * as ImagePicker from "expo-image-picker";
+import { API_URL } from "@env";
 
 import TasksTab from "./tabs/TasksTab";
 import MonitoringTab from "./tabs/MonitoringTab";
 import IntegrationsTab from "./tabs/IntegrationsTab";
-import { getFarmById } from "../../services/farmApi";
+import { useFarmDetails } from "../../hooks/useFarmDetails";
+import { useFarmCrops } from "../../hooks/useFarmCrops";
+import FarmHeaderCarousel from "../../components/FarmHeaderCarousel";
+import FarmImageUploader from "../../components/FarmImageUploader";
+import EditFarmGallery from "../../components/EditFarmGallery";
 
 export default function FarmDetailsScreen() {
   const route = useRoute();
   const { farmId } = route.params;
   const { token } = useAuth();
   const navigation = useNavigation();
-  const [farmDetails, setFarmDetails] = useState(null);
-  const [activeTab, setActiveTab] = useState("Task");
+  const [refreshing, setRefreshing] = useState(false);
+  const [isUploadModalVisible, setUploadModalVisible] = useState(false);
+
+  const {
+    data: farmDetails,
+    isLoading: farmLoading,
+    isError,
+    refetch: refetchFarm,
+  } = useFarmDetails(farmId, token);
+
+  const { refetch: refetchCrops, isFetching } = useFarmCrops(farmId, token);
+
+  const [activeTab, setActiveTab] = useState("Monitoring");
   const [imageLoading, setImageLoading] = useState(true);
-  const [farmLoading, setFarmLoading] = useState(true);
-  
 
-  useEffect(() => {
-    const fetchFarmDetails = async () => {
-      const farmData = await getFarmById(farmId, token);
-      setFarmDetails(farmData.farm);
-      setFarmLoading(false);
-      
-    };
-
-    fetchFarmDetails();
-  }, [farmId, token]);
-
-  const handleImageUpload = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      alert("Permission to access camera roll is required!");
-      return;
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refetchFarm(), refetchCrops()]);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setRefreshing(false);
     }
+  };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    })
+  const handleImageUpload = () => {
+    setUploadModalVisible(true);
+  };
 
-    if (!result.canceled){
-      setFarmDetails({...farmDetails, imageUri: result.assets[0].uri});
+  const onUploadSuccess = (newUrl) => {
+    setUploadModalVisible(false);
+    refetchFarm();
+  };
 
-      // TODO: upload image to firebase
-    }    
-  }
-  
-
-  const renderContent = (token, farmId) => {
+  const renderContent = () => {
     switch (activeTab) {
       case "Monitoring":
-        return <MonitoringTab />;
+        return <MonitoringTab userToken={token} farmId={farmId} />;
       case "Tasks":
         return <TasksTab />;
       case "Integrations":
@@ -78,6 +78,36 @@ export default function FarmDetailsScreen() {
     }
   };
 
+  const handleDeleteImage = async (imageUrl) => {
+    try {
+      const res = await fetch(`${API_URL}/images/farms/${farmId}/`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ imageUrl }),
+      });
+
+      if (res.ok) {
+        refetchFarm();
+      } else {
+        Alert.alert("Error", "Could not delete image.");
+      }
+    } catch (error) {
+      console.error("Delete failed:", error);
+      Alert.alert("Error", "Network request failed.");
+    }
+  };
+
+  if (farmLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#388e3c" />
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-white">
       <StatusBar
@@ -86,42 +116,20 @@ export default function FarmDetailsScreen() {
         backgroundColor="transparent"
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1 pb-32">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1 pb-32"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Farm Image Header */}
-        <View className="h-[400px] w-full overflow-hidden rounded-b-[40px] bg-gray-900 shadow-2xl">
-          <ImageBackground
-            source={{
-              uri: farmDetails?.imageUri ||
-                    "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000"
-                  
-            }}
-            className="w-full h-full justify-between p-6 pt-12"
-            resizeMode="cover"
-          >
-            <View className="absolute inset-0 bg-black/30" />
-
-            {/* Top Row */}
-            <View className="flex-row justify-between items-start z-10">
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                className="bg-white/90 h-10 w-10 rounded-2xl items-center justify-center shadow-lg"
-              >
-                <Feather name="arrow-left" size={20} color="#1A1C1B" />
-              </TouchableOpacity>
-
-              {/* Edit Photo Button */}
-              <TouchableOpacity
-                onPress={handleImageUpload}
-                className="bg-white/90 px-4 py-2 rounded-2xl flex-row items-center shadow-lg"
-              >
-                <Feather name="camera" size={16} color="#1A1C1B" />
-                <Text className="text-[#1A1C1B] font-bold text-xs ml-2">
-                  Change Photo
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ImageBackground>
-        </View>
+        <FarmHeaderCarousel
+          images={farmDetails.images}
+          handleImageUpload={() => {
+            handleImageUpload();
+          }}
+        />
 
         {/* --- Main Data Container --- */}
         <View className="-mt-6 bg-white rounded-t-[32px] px-5 pt-8 pb-10 shadow-lg min-h-screen">
@@ -129,44 +137,29 @@ export default function FarmDetailsScreen() {
           <View className="flex-row justify-between items-center mb-6">
             <View className="flex-row items-center">
               <Text className="text-2xl font-bold text-[#1A1C1B]">
-                {farmDetails?.name || <ActivityIndicator size="small" color="#1A1C1B" />}
+                {farmDetails?.name || (
+                  <ActivityIndicator size="small" color="#1A1C1B" />
+                )}
               </Text>
               <TouchableOpacity className="ml-2">
                 <Feather name="edit-2" size={16} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity className="bg-[#F3F5F4] px-3 py-2 rounded-lg flex-row items-center">
-              <Text className="text-[#1A1C1B] font-medium mr-1 text-xs">
-                More Details
-              </Text>
-              <Feather name="chevron-right" size={14} color="#1A1C1B" />
-            </TouchableOpacity>
           </View>
 
           {/* Info Grid */}
           <View className="flex-row flex-wrap justify-between mb-8">
             <InfoCard
-              label="Crop Health"
-              value="Good"
-              isBadge
-              badgeColor="bg-[#E8F5E9]"
-              textColor="text-[#2E7D32]"
-              icon="chevron-right"
-            />
-            <InfoCard label="Planting date" value="12/01/2024" />
-            <InfoCard
               label="Expenses"
-              value="$2,314.00"
-              subValue="-10%"
+              value="KSH 20,314.00"
               subColor="text-[#2E7D32]"
-              icon="chevron-right"
             />
             <InfoCard label="Harvest time" value="~4 Months" />
           </View>
 
           {/* Tab Navigation */}
           <View className="flex-row justify-between border-b border-[#F0F2F1] mb-6">
-            {["Monitoring", "Tasks" ,"Integrations"].map((tab) => (
+            {["Monitoring", "Tasks", "Integrations"].map((tab) => (
               <TouchableOpacity
                 key={tab}
                 onPress={() => setActiveTab(tab)}
@@ -186,6 +179,67 @@ export default function FarmDetailsScreen() {
         </View>
       </ScrollView>
 
+      {/* Updated Edit Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isUploadModalVisible}
+        onRequestClose={() => setUploadModalVisible(false)}
+      >
+        <View className="flex-1 justify-end bg-black/60">
+          {/* Touchable overlay to close when clicking outside */}
+          <TouchableOpacity
+            className="flex-1"
+            onPress={() => setUploadModalVisible(false)}
+          />
+
+          <View className="bg-white rounded-t-[32px] h-[80%] shadow-2xl overflow-hidden">
+            {/* 1. Header */}
+            <View className="px-6 pt-6 pb-4 flex-row justify-between items-center border-b border-gray-100">
+              <View>
+                <Text className="text-xl font-extrabold text-gray-900">
+                  Manage Photos
+                </Text>
+                <Text className="text-sm text-gray-500">
+                  {farmDetails?.images?.length || 0} photos uploaded
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setUploadModalVisible(false)}
+                className="bg-gray-100 w-10 h-10 rounded-full items-center justify-center"
+              >
+                <Feather name="x" size={20} color="#4b5563" />
+              </TouchableOpacity>
+            </View>
+
+            {/* 2. Scrollable Content */}
+            <View className="flex-1 px-5 pt-4">
+              {/* Section: Gallery */}
+              <Text className="text-sm font-bold text-gray-400 uppercase mb-3 tracking-wider">
+                Current Gallery
+              </Text>
+
+              <View className="flex-1 bg-gray-50 rounded-2xl p-2 mb-6">
+                <EditFarmGallery
+                  images={farmDetails?.images || []}
+                  onDelete={handleDeleteImage}
+                />
+              </View>
+
+              {/* Section: Uploader */}
+              <Text className="text-sm font-bold text-gray-400 uppercase mb-3 tracking-wider">
+                Upload New
+              </Text>
+              <View className="mb-8">
+                <FarmImageUploader
+                  farmId={farmId}
+                  onImageUploaded={onUploadSuccess}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <TouchableOpacity
         className="absolute bottom-8 right-6 h-16 w-16 bg-[#2E7D32] rounded-full items-center justify-center shadow-xl z-50"
         activeOpacity={0.8}

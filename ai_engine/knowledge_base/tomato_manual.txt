@@ -1,0 +1,316 @@
+AGROTRACK GUIDE: TOMATO FARMING (KENYA)
+
+==================================================
+SECTION 1: VARIETY SELECTION
+==================================================
+
+DETERMINATE VARIETIES (Bush type - for open field):
+- Cal J: Very popular, firm fruits, 70-80 days, good for market
+- Marglobe: Disease resistant, medium-sized fruits, 75-85 days
+- Roma VF: Processing type, elongated fruits, 75-80 days
+- Money Maker: High yielding, round fruits, 70-75 days
+- Rio Grande: Heat tolerant, paste-type, 80 days
+
+INDETERMINATE VARIETIES (Climbing - for greenhouse):
+- Anna F1: High yielding, disease resistant, 65-75 days
+- Kilele F1: Premium quality, long shelf life, 70-80 days
+- Prostar F1: Very high yielding, greenhouse variety
+- Tylka F1: Bacterial wilt resistant, 75 days
+- Eden Glory F1: Good for export, uniform fruits
+
+CHERRY TOMATOES:
+- Galilea F1: Sweet, high value, 60-70 days
+- Cherry Gold: Yellow cherry, niche market
+
+HYBRID vs OPEN POLLINATED:
+- Hybrids (F1): Higher yield, disease resistant, expensive seed
+- Open pollinated: Lower yield, can save seed, cheaper
+
+==================================================
+SECTION 2: SOIL & LAND PREPARATION
+==================================================
+
+SOIL REQUIREMENTS:
+- Well-drained sandy loam or loamy soils
+- pH: 6.0-6.8 (slightly acidic to neutral)
+- Deep soils (60cm+) for good root development
+- Rich in organic matter
+
+SITE SELECTION:
+- Full sunlight (at least 6-8 hours/day)
+- Good drainage (avoid waterlogged areas)
+- Protected from strong winds
+- Access to water for irrigation
+
+LAND PREPARATION:
+- Deep ploughing to 30cm
+- Incorporate 10-15 tons well-decomposed manure per acre
+- Form raised beds: 1m wide, 15-20cm high
+- Leave 50cm pathways between beds
+
+==================================================
+SECTION 3: NURSERY & TRANSPLANTING
+==================================================
+
+SEED SOWING:
+- Nursery period: 3-4 weeks
+- Sow in seed trays or nursery beds
+- Use sterilized seedling mix (compost + soil + sand)
+- Sowing depth: 1cm
+- Seed rate: 200-300g per acre (open pollinated)
+- Seed rate: 100-150g per acre (hybrid)
+
+NURSERY MANAGEMENT:
+- Water twice daily (morning and evening)
+- Provide shade for first 7 days
+- Gradually remove shade after germination
+- Apply foliar feed at 2 weeks (e.g., Optimizer)
+- Harden seedlings 1 week before transplanting
+
+TRANSPLANTING:
+- Seedling age: 3-4 weeks (4-6 true leaves)
+- Transplant in evening or on cloudy day
+- Spacing for determinate: 60cm × 45cm (12,000 plants/acre)
+- Spacing for indeterminate: 90cm × 50cm (9,500 plants/acre)
+- Water immediately after transplanting
+
+==================================================
+SECTION 4: FERTILIZER APPLICATION
+==================================================
+
+SOIL PREPARATION:
+- Well-decomposed manure: 10-15 tons per acre
+- Apply 2 weeks before transplanting
+
+BASAL FERTILIZER (AT TRANSPLANTING):
+- DAP: 200kg per acre (2 bags)
+- Alternatively NPK 17:17:17: 200kg per acre
+- Apply in planting holes, mix with soil
+
+TOP DRESSING SCHEDULE:
+- Week 3: CAN 50kg per acre
+- Week 6: CAN 50kg per acre (during flowering)
+- Week 9: NPK 20:10:10 50kg per acre (during fruiting)
+- Week 12: CAN 50kg per acre
+- Total CAN: 150kg; NPK: 50kg
+
+FOLIAR FEEDING:
+- Start at flowering stage
+- Spray every 2 weeks until harvest
+- Use balanced foliar fertilizers (Optimizer, Lavender)
+- Include calcium and boron for better fruit quality
+- Prevents blossom end rot
+
+==================================================
+SECTION 5: IRRIGATION & WATER MANAGEMENT
+==================================================
+
+WATER REQUIREMENTS:
+- Tomatoes need consistent moisture
+- Critical periods: Flowering and fruit development
+- Avoid water stress (causes blossom end rot, fruit cracking)
+
+IRRIGATION METHODS:
+- Drip irrigation: Most efficient, reduces diseases
+- Furrow irrigation: Common but promotes diseases
+- Sprinkler: Not recommended (wets foliage, spreads diseases)
+
+IRRIGATION SCHEDULE:
+- Seedling stage: Light watering daily
+- Vegetative stage: Every 2-3 days
+- Flowering/fruiting: Every 2 days (more frequent in hot weather)
+- Amount: 20-25mm per week
+
+AVOID:
+- Waterlogging (root diseases)
+- Irregular watering (fruit cracking)
+- Overhead irrigation (spreads leaf diseases)
+
+==================================================
+SECTION 6: STAKING & PRUNING
+==================================================
+
+STAKING (Indeterminate varieties):
+- Use wooden or bamboo stakes (1.5-2m high)
+- Install stakes at transplanting
+- Tie plants loosely with soft twine
+- For greenhouse: String support from overhead wires
+
+PRUNING:
+- Remove all suckers (side shoots from leaf axils)
+- Keep only main stem for indeterminate varieties
+- Prune weekly to maintain single stem
+- Top the plant after 5-6 fruit trusses (greenhouses)
+- Remove lower leaves touching ground
+
+DETERMINATE VARIETIES:
+- Minimal pruning required
+- Remove only diseased or damaged leaves
+- No staking needed (bush type)
+
+==================================================
+SECTION 7: PEST & DISEASE MANAGEMENT
+==================================================
+
+MAJOR PESTS:
+- Whiteflies: Transmit viral diseases, suck sap
+  Control: Yellow sticky traps, spray Imidacloprid or Acetamiprid
+- Red Spider Mites: Bronzing of leaves, webbing
+  Control: Spray Abamectin or Spiromesifen
+- Tomato Leaf Miner (Tuta absoluta): Most serious pest, mines leaves and fruits
+  Control: Pheromone traps, spray Chlorantraniliprole or Emamectin benzoate
+- Aphids: Suck sap, transmit viruses
+  Control: Spray Imidacloprid or Dimethoate
+- African Bollworm: Bores into fruits
+  Control: Spray Indoxacarb or Lambda-cyhalothrin
+
+MAJOR DISEASES:
+- Early Blight (Alternaria): Concentric rings on leaves
+  Control: Spray Mancozeb or Chlorothalonil every 7-10 days
+- Late Blight: Water-soaked lesions, white mold
+  Control: Spray Metalaxyl + Mancozeb or Cymoxanil
+- Bacterial Wilt: Sudden wilting, no yellowing
+  Control: Use resistant varieties, crop rotation, remove infected plants
+- Fusarium Wilt: Yellowing on one side, vascular browning
+  Control: Use resistant varieties (F1 hybrids), soil fumigation
+- Septoria Leaf Spot: Small brown spots with white centers
+  Control: Spray copper fungicides or Chlorothalonil
+- Blossom End Rot: Dark sunken spot on fruit base (calcium deficiency)
+  Control: Maintain consistent moisture, foliar calcium sprays
+
+VIRAL DISEASES:
+- Tomato Yellow Leaf Curl Virus (TYLCV): Yellowing, leaf curling, stunting
+  Control: Control whiteflies, use resistant varieties, remove infected plants
+- Tomato Mosaic Virus: Mottling, deformed leaves
+  Control: Use certified seed, sanitize tools, remove infected plants
+
+INTEGRATED PEST MANAGEMENT (IPM):
+- Use yellow sticky traps for whiteflies and leaf miners
+- Scout fields weekly
+- Remove and destroy infected plants
+- Rotate pesticides to avoid resistance
+- Use biological controls where possible
+
+==================================================
+SECTION 8: HARVESTING & POST-HARVEST
+==================================================
+
+HARVEST TIMING:
+- Determinate: Start harvest 70-85 days after transplanting
+- Indeterminate: Start harvest 65-75 days, continues for 2-3 months
+- Harvest stage depends on market:
+  * Green stage: For long-distance transport
+  * Breaker stage: Light pink color starting
+  * Pink stage: 30-60% pink color
+  * Red ripe: Fully colored, for local market
+
+HARVESTING PROCEDURE:
+- Harvest early morning or late evening
+- Pick with calyx (stem attached) for better shelf life
+- Handle carefully to avoid bruising
+- Use clean harvesting crates
+- Harvest every 2-3 days during peak season
+
+GRADING:
+- Grade A: Large (>70mm), uniform, no defects
+- Grade B: Medium (50-70mm), minor defects acceptable
+- Grade C: Small (<50mm) or significant defects
+- Reject diseased, cracked, or severely damaged fruits
+
+POST-HARVEST HANDLING:
+- Sort and grade immediately after harvest
+- Pack in ventilated crates (do not overfill)
+- Store in cool, shaded area (15-20°C ideal)
+- For export: Pre-cool to 12-15°C within 6 hours
+- Use refrigerated transport for long distances
+
+SHELF LIFE:
+- Green tomatoes: 2-3 weeks at 12-15°C
+- Ripe tomatoes: 7-10 days at room temperature
+- Do not refrigerate ripe tomatoes (affects flavor)
+
+==================================================
+SECTION 9: YIELD & ECONOMICS
+==================================================
+
+EXPECTED YIELD:
+- Open field (determinate): 15,000-25,000 kg per acre
+- Greenhouse (indeterminate): 40,000-80,000 kg per acre
+- Cherry tomatoes: 20,000-30,000 kg per acre
+
+MARKET PRICES (Seasonal variation):
+- Glut season: 20-40 KES per kg
+- Off-season: 60-120 KES per kg
+- Grade A premium: +30-50%
+- Cherry tomatoes: 100-200 KES per kg
+
+OPEN FIELD PRODUCTION COSTS PER ACRE:
+- Seedlings: 15,000-25,000 KES
+- Fertilizers: 30,000-40,000 KES
+- Pesticides: 40,000-60,000 KES
+- Labor: 50,000-80,000 KES
+- Irrigation: 20,000-30,000 KES
+- Other costs: 20,000 KES
+- Total: 175,000-255,000 KES
+
+INCOME POTENTIAL (Open field):
+- 20,000 kg × 50 KES = 1,000,000 KES per acre
+- Net profit: 700,000-800,000 KES per acre
+
+GREENHOUSE PRODUCTION:
+- Higher setup costs (500,000-2,000,000 KES)
+- Production costs: 300,000-400,000 KES per acre
+- Income: 2,000,000-4,000,000 KES per acre
+- Net profit: 1,500,000-3,500,000 KES per acre
+
+==================================================
+SECTION 10: PROTECTED CULTIVATION
+==================================================
+
+GREENHOUSE TYPES:
+- Simple polythene tunnel: 100,000-300,000 KES per acre
+- Wooden greenhouse: 300,000-800,000 KES per acre
+- Metallic greenhouse: 1,000,000-2,500,000 KES per acre
+
+ADVANTAGES:
+- Year-round production
+- Higher yields (2-3x open field)
+- Better quality fruits
+- Reduced pest and disease pressure
+- Premium prices
+
+GREENHOUSE MANAGEMENT:
+- Temperature: Keep below 30°C (ventilation critical)
+- Humidity: 60-70% (prevent fungal diseases)
+- Irrigation: Drip system essential
+- Pruning: Single stem, regular de-suckering
+- Pollination: May need hand pollination or bumblebees
+
+==================================================
+SECTION 11: VALUE ADDITION & MARKETS
+==================================================
+
+FRESH MARKET:
+- Local markets and greengrocers
+- Supermarkets (strict quality requirements)
+- Hotels and restaurants
+- Direct sales to consumers
+
+PROCESSING:
+- Tomato paste/puree
+- Dried tomatoes
+- Tomato sauce/ketchup
+
+EXPORT OPPORTUNITIES:
+- European Union market (strict standards)
+- Middle East markets
+- Requires GlobalGAP certification
+
+CONTRACT FARMING:
+- Processor contracts (Trufoods, Frigoken)
+- Guaranteed market but specific varieties required
+- Technical support provided
+
+==================================================
+END OF MANUAL
+==================================================

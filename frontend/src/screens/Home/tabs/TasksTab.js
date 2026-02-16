@@ -107,16 +107,7 @@ export default function TasksTab() {
     <View>
       {/* Progress & Upcoming Task Row */}
       <View className="flex-row mb-6">
-        {/* Percentage Circle */}
-        <View className="bg-white border border-gray-100 p-4 rounded-2xl w-[35%] items-center justify-center mr-3 shadow-sm">
-            <View className="w-16 h-16 rounded-full border-4 border-[#E8F5E9] items-center justify-center relative">
-                {/* Visual circle progress trick preserved */}
-                <View className="absolute top-0 left-0 w-full h-full rounded-full border-t-4 border-l-4 border-[#2E7D32] transform rotate-45" />
-                <Text className="text-lg font-bold text-gray-800">{progressPercentage}%</Text>
-            </View>
-            <Text className="text-xs text-gray-400 text-center mt-2">Tasks Completed</Text>
-        </View>
-
+       
         {/* Upcoming Task Card */}
         <View className="flex-1 bg-white border border-gray-100 p-4 rounded-2xl shadow-sm justify-between">
             <View className="flex-row justify-between items-start">
@@ -134,12 +125,6 @@ export default function TasksTab() {
             </Text>
         </View>
       </View>
-
-      {/* View All Button */}
-      <TouchableOpacity className="w-full py-4 border border-gray-100 rounded-2xl flex-row justify-center items-center mb-8 shadow-sm bg-white">
-        <Text className="font-bold text-[#1A1C1B] mr-2">View All Task</Text>
-        <Feather name="chevron-right" size={16} color="black" />
-      </TouchableOpacity>
 
       {/* Month Header */}
       <View className="flex-row justify-between items-center mb-4">

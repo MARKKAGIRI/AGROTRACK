@@ -29,6 +29,10 @@ def load_knowledge_base():
     knowledge_files = [
         "knowledge_base/maize_manual.txt",
         "knowledge_base/beans_manual.txt",
+        "knowledge_base/coffee_manual.txt",
+        "knowledge_base/potato_manual.txt",
+        "knowledge_base/tomato_manual.txt",
+        "knowledge_base/banana_manual.txt",
         "knowledge_base/general_farming_tips.txt"
     ]
     
@@ -128,13 +132,14 @@ def save_user_memory(user_id: str, db):
 
 # --- CONTEXT ANALYSIS ---
 def extract_crop_info(user_context: str):
-    """Extract crop information from user context"""
+    """Extract crop information from user context - enhanced for more crops"""
     crops = []
-    # Match patterns like "Maize (Planted: 2025-12-14)"
-    pattern = r'(\w+)\s*\(Planted:\s*(\d{4}-\d{2}-\d{2})\)'
-    matches = re.findall(pattern, user_context)
     
-    for crop_name, plant_date in matches:
+    # Pattern 1: "Maize (Planted: 2025-12-14)" or "Maize (planted 45 days ago"
+    pattern1 = r'(\w+)\s*\((?:Planted|planted):\s*(\d{4}-\d{2}-\d{2})\)'
+    matches1 = re.findall(pattern1, user_context, re.IGNORECASE)
+    
+    for crop_name, plant_date in matches1:
         try:
             planted = datetime.strptime(plant_date, "%Y-%m-%d")
             days_since_planting = (datetime.now() - planted).days
@@ -145,6 +150,23 @@ def extract_crop_info(user_context: str):
             })
         except:
             pass
+    
+    # Pattern 2: "Coffee (planted 365 days ago)"
+    pattern2 = r'(\w+)\s*\(planted\s+(\d+)\s+days\s+ago'
+    matches2 = re.findall(pattern2, user_context, re.IGNORECASE)
+    
+    for crop_name, days in matches2:
+        if crop_name not in [c["name"] for c in crops]:  # Avoid duplicates
+            try:
+                days_int = int(days)
+                planted_date = (datetime.now() - timedelta(days=days_int)).strftime("%Y-%m-%d")
+                crops.append({
+                    "name": crop_name,
+                    "planted_date": planted_date,
+                    "days_since_planting": days_int
+                })
+            except:
+                pass
     
     return crops
 
@@ -181,14 +203,14 @@ def get_relevant_manual_context(question: str, user_context: str, k: int = 4):
     return ""
 
 def get_growth_stage_info(crops):
-    """Provide growth stage information for crops"""
+    """Provide growth stage information for crops - enhanced for all crops"""
     stage_info = []
     
     for crop in crops:
         days = crop["days_since_planting"]
         name = crop["name"].lower()
         
-        if "maize" in name:
+        if "maize" in name or "corn" in name:
             if days < 14:
                 stage = "Germination/Seedling stage"
                 advice = "Ensure adequate moisture. Watch for cutworms."
@@ -227,10 +249,79 @@ def get_growth_stage_info(crops):
             else:
                 stage = "Maturity/Harvest ready"
                 advice = "Pods should be dry. Harvest and dry to 12-14% moisture."
-        else:
-            continue
         
-        stage_info.append(f"{crop['name']} (Planted {crop['planted_date']}, {days} days ago):\n  Stage: {stage}\n  Advice: {advice}")
+        elif "coffee" in name:
+            if days < 180:
+                stage = "Young plant establishment"
+                advice = "Ensure good shade (50%). Regular watering. Watch for diseases."
+            elif days < 365:
+                stage = "First year growth"
+                advice = "Remove flowers to encourage vegetative growth. Maintain mulch."
+            elif days < 730:
+                stage = "Second year - preparing for first harvest"
+                advice = "Apply fertilizers as recommended. Start regular spraying for CBD/CLR."
+            else:
+                stage = "Mature tree"
+                advice = "Regular pruning, spraying, and fertilization. Harvest ripe cherries only."
+        
+        elif "potato" in name or "irish" in name:
+            if days < 14:
+                stage = "Sprouting"
+                advice = "Keep soil moist. Watch for cutworms."
+            elif days < 35:
+                stage = "Vegetative growth"
+                advice = "Earth up and apply first top dressing. Start fungicide sprays."
+            elif days < 60:
+                stage = "Tuber initiation"
+                advice = "CRITICAL irrigation period. Second earthing up."
+            elif days < 90:
+                stage = "Tuber bulking"
+                advice = "Maintain moisture. Continue fungicide sprays for late blight."
+            else:
+                stage = "Maturity/Harvest ready"
+                advice = "Stop irrigation. Cut vines 10 days before harvest."
+        
+        elif "tomato" in name:
+            if days < 21:
+                stage = "Seedling establishment"
+                advice = "Water regularly. Start staking for indeterminate varieties."
+            elif days < 45:
+                stage = "Vegetative growth"
+                advice = "Apply first top dressing. Prune suckers. Start pest monitoring."
+            elif days < 65:
+                stage = "Flowering"
+                advice = "Critical for fruit set. Ensure adequate water. Foliar calcium to prevent blossom end rot."
+            elif days < 85:
+                stage = "Fruit development"
+                advice = "Monitor for pests (Tuta absoluta, whiteflies). Maintain consistent watering."
+            else:
+                stage = "Harvesting period"
+                advice = "Harvest every 2-3 days. Handle fruits carefully. Continue pest management."
+        
+        elif "banana" in name or "plantain" in name or "matoke" in name:
+            if days < 90:
+                stage = "Early establishment"
+                advice = "Regular watering. Mulch heavily. First fertilizer application."
+            elif days < 180:
+                stage = "Active growth phase"
+                advice = "Start desuckering (keep only 3 stems). Continue fertilization."
+            elif days < 270:
+                stage = "Pre-flowering"
+                advice = "Ensure adequate water and nutrients. Watch for weevils."
+            elif days < 365:
+                stage = "Flowering to harvest"
+                advice = "Prop bunches. Continue pest/disease management. Harvest when mature."
+            else:
+                stage = "Ratoon cycle"
+                advice = "Regular desuckering. Maintain fertilization schedule. Harvest every 8-10 months."
+        
+        else:
+            # Generic advice for unknown crops
+            stage = "Growth monitoring needed"
+            advice = "Monitor crop regularly. Apply appropriate fertilizers and pest control."
+        
+        if stage:  # Only add if we have stage info
+            stage_info.append(f"{crop['name']} (Planted {crop['planted_date']}, {days} days ago):\n  Stage: {stage}\n  Advice: {advice}")
     
     return "\n\n".join(stage_info) if stage_info else ""
 
@@ -325,7 +416,6 @@ Provide treatment advice for the most likely condition, and mention prevention t
         # ---------------------------------------
 
         # --- STEP 2: STANDARD CONTEXT RETRIEVAL ---
-        # (Your existing logic)
         crops = extract_crop_info(user_context)
         growth_stage_info = get_growth_stage_info(crops)
         
@@ -372,7 +462,7 @@ ANSWER:"""
         response = llm.invoke(prompt)
         answer_text = response.content.strip()
         
-        # Clean up response (Your existing regex)
+        # Clean up response
         answer_text = re.sub(r'^(Good day|Hello|Hi),?\s*(Farmer|friend).*?\.', '', answer_text, flags=re.IGNORECASE)
         answer_text = re.sub(r"I'm AgroAI.*?\.", '', answer_text, flags=re.IGNORECASE)
         answer_text = answer_text.strip()
