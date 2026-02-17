@@ -2,14 +2,11 @@ import axios from "axios";
 import { API_URL } from "@env";
 
 
-export const sendMessageToAI = async (userId, question, image, token) => {
+export const sendMessageToAI = async (userId, question, image, token, sessionId) => {
   try {
-    console.log("Sending message to AI:", question);
-    console.log("Image attached: ", image? "Yes" : "no");
-    console.log("For User ID:", userId);
-
     const formData = new FormData();
     formData.append("userId", userId)
+    formData.append("sessionId", sessionId)
 
     // incase question is empty (users sends only an image)
     formData.append("question", question || "Analyze this image");

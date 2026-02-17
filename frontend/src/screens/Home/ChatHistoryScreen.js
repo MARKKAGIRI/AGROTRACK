@@ -3,39 +3,79 @@ import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons, Feather } from "@expo/vector-icons";
-import { getSessions, initDB } from "../../services/sqlite-storage/ChatStorage";
-import { useSQLiteContext } from "expo-sqlite";
+import { getSessions, initDB, syncSessionsWithServer } from "../../services/sqlite-storage/ChatStorage";
+import { useAuth } from "../../context/AuthContext"
+import ChatSkeletonItem from "../../components/loading/ChatSkeletonItem"
 
 const ChatHistoryScreen = ({ navigation }) => {
+  const { user, token } = useAuth()
   const [sessions, setSessions] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadLocalData = useCallback(async () => { 
+    const localData = await getSessions();
+    setSessions(localData);
+  }, []);
+
+  const syncAndLoad = useCallback(async () => {
+    try {
+      await syncSessionsWithServer(user.user_id, token);
+      await loadLocalData();
+    } catch (error) {
+      console.error("Sync failed:", error);
+    }
+  }, [user.user_id, token, loadLocalData]);
+
+
+React.useEffect(() => {
+  let isMounted = true;
+
+  const init = async () => {
+    await initDB();
+    const localData = await getSessions();
+
+    if (isMounted) {
+      setSessions(localData);
+      if (localData.length > 0) {
+        setIsLoading(false);
+      }
+    }
+    try {
+      await syncSessionsWithServer(user.user_id, token);
+      const updatedData = await getSessions();
+      if (isMounted) {
+        setSessions(updatedData);
+      }
+    } catch (e) {
+      console.log("Sync cancelled or failed", e);
+    } finally {
+      if (isMounted) {
+        setIsLoading(false);
+        setIsInitialLoad(false);
+      }
+    }
+  };
+
+  init();
+
+  return () => { isMounted = false; };
+}, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await syncAndLoad();
+    setRefreshing(false);
+  };
 
   // Initialize DB and load sessions when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      let isActive = true;
-
-      const loadData = async () => {
-        try {
-          // 1. Initialize DB
-          initDB();
-
-          // 2. Fetch Sessions
-          const data = await getSessions();
-
-          if (isActive) {
-            setSessions(data);
-          }
-        } catch (e) {
-          console.error("Failed to load history:", e);
-        }
-      };
-
-      loadData();
-
-      return () => {
-        isActive = false;
-      };
-    }, []),
+      if (!isInitialLoad) {
+        loadLocalData();
+      }
+    }, [isInitialLoad, loadLocalData])
   );
 
   const formatTime = (timestamp) => {
@@ -100,7 +140,7 @@ const ChatHistoryScreen = ({ navigation }) => {
     <SafeAreaView className="flex-1 bg-[#F5F5F0]" edges={["top"]}>
       {/* Header */}
       <View className="px-5 py-4 bg-[#F5F5F0]">
-        <View className="flex-row items-center justify-between mb-6">
+        <View className="flex-row items-center justify-between mb-2">
           {/* Back Button */}
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -129,10 +169,26 @@ const ChatHistoryScreen = ({ navigation }) => {
 
       {/* Chat List */}
       <View className="flex-1 bg-white mt-4">
+        {
+          isLoading ? (
+          
+          <View>
+             {[1, 2, 3, 4, 5, 6].map((i) => (
+                <View key={i}>
+                   <ChatSkeletonItem />
+                   <View className="bg-gray-100" style={{ height: 1, marginLeft: 70 }} />
+                </View>
+             ))}
+          </View>
+        )
+        :
+        (
         <FlatList
           data={sessions}
           keyExtractor={(item) => item.id}
           renderItem={renderSession}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
           contentContainerStyle={{
             flexGrow: 1,
           }}
@@ -172,14 +228,17 @@ const ChatHistoryScreen = ({ navigation }) => {
             </View>
           }
         />
+        )}
       </View>
 
-      <TouchableOpacity
+      {sessions.length > 0 && (
+        <TouchableOpacity
         onPress={() => navigation.navigate("Chatbot", { sessionId: null })}
         className="absolute right-10 bottom-10 w-14 h-14 rounded-full bg-[#7CB342] items-center justify-center shadow-sm"
       >
         <Ionicons name="chatbubble-ellipses" size={30} color="white" />
       </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
