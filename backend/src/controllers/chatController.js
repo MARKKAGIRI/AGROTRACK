@@ -11,11 +11,11 @@ const CONTEXT_CACHE_TTL = 3600;
 
 const askAI = async (req, res) => {
   try {
-    const { userId, question } = req.body;
+    const { userId, question, sessionId } = req.body;
     const imageFile = req.file;
 
     // Validate input
-    if (!userId || !question) {
+    if (!userId || !question || !sessionId) {
       return res
         .status(400)
         .json({ error: "userId and question are required" });
@@ -25,6 +25,7 @@ const askAI = async (req, res) => {
     await prisma.chatMessage.create({
       data: {
         userId: userId,
+        sessionId: sessionId,
         role: 'user',
         content: question || (imageFile ? "Analyze this image" : "Hello"),
       }
@@ -242,7 +243,7 @@ const askAI = async (req, res) => {
 
     // Get chat history (always fresh)
     const rawHistory = await prisma.chatMessage.findMany({
-      where: { userId: userId },
+      where: { userId: userId, sessionId: sessionId },
       orderBy: { createdAt: 'desc' },
       take: 10, // Increased from 6 for better context
     });
@@ -284,6 +285,7 @@ const askAI = async (req, res) => {
     await prisma.chatMessage.create({
       data: {
         userId: userId,
+        sessionId: sessionId,
         role: 'ai',
         content: aiAnswer,
       }
@@ -291,7 +293,7 @@ const askAI = async (req, res) => {
    
     return res.status(200).json({ 
       answer: aiAnswer, 
-      contextUsed: "Enhanced context sent to AI" 
+      sessionId: sessionId 
     });
 
   } catch (error) {
@@ -307,6 +309,87 @@ const askAI = async (req, res) => {
   }
 };
 
+const getUserSessions = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const sessions = await prisma.chatMessage.groupBy({
+      by: ['sessionId'],
+      where: { userId: userId },
+      _max: {
+        createdAt: true
+      },
+      orderBy: {
+        _max: { createdAt: 'desc' }
+      }
+    });
+
+    const formattedSessions = await Promise.all(
+      sessions.map(async (s) => {
+        const lastMsg = await prisma.chatMessage.findFirst({
+          where: {sessionId: s.sessionId},
+          orderBy: {createdAt: 'desc'}
+        });
+
+        const firstMsg = await prisma.chatMessage.findFirst({
+          where: { sessionId: s.sessionId },
+          orderBy: { createdAt: 'desc'}
+        });
+
+        return {
+          id: s.sessionId,
+          title: firstMsg ? (firstMsg.content.substring(0, 30) + (firstMsg.content.length > 30? '...' : '')) : 'New Chat',
+          lastMessage: lastMsg?.content || '',
+          timestamp: s._max.createdAt,
+        };
+      })
+    );
+
+    res.json(formattedSessions)
+  }catch (error) {
+    console.error("Fetch Sessions Error: ", error);
+    res.status(500).json({error: "Failed to fetch history"})
+  }
+}
+
+const getSessionMessages = async (req, res) => {
+  const { sessionId } = req.params;
+
+  try {
+    // 1. Fetch all messages for this session ID
+    const messages = await prisma.chatMessage.findMany({
+      where: { 
+        sessionId: sessionId 
+      },
+      orderBy: { 
+        createdAt: 'asc' // Important: Oldest messages first
+      }
+    });
+
+    // 2. Format the data to match what your Frontend expects
+    // Frontend expects: { id, text, sender, image, timestamp }
+    const formattedMessages = messages.map(msg => ({
+      id: msg.id.toString(), // Ensure ID is a string
+      text: msg.content,     // Map 'content' (DB) to 'text' (Frontend)
+      
+      // Map your DB role to 'user'/'bot' if needed
+      // Assuming your DB uses 'user'/'assistant' or similar
+      sender: msg.role === 'user' ? 'user' : 'bot', 
+      
+      image: msg.imageUrl || null, // specific field for images if you have one
+      timestamp: msg.createdAt
+    }));
+
+    res.json(formattedMessages);
+
+  } catch (error) {
+    console.error("Fetch Messages Error: ", error);
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+};
+
 module.exports = {
   askAI,
+  getUserSessions,
+  getSessionMessages
 };
