@@ -1,9 +1,10 @@
-const { PrismaClient } = require('../src/generated/prisma')
+const { PrismaClient } = require("../src/generated/prisma");
+const redisClient = require("../src/config/redisClient");
 
 const prisma = new PrismaClient();
 
 // Increase timeout for remote Neon DB connections (default is 5s, usually too short for cloud)
-jest.setTimeout(30000); 
+jest.setTimeout(30000);
 
 beforeAll(async () => {
   // Establish connection to the Neon Test Branch
@@ -11,8 +12,6 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
- 
-    
   const deleteTransactions = [
     prisma.notification.deleteMany(),
     prisma.task.deleteMany(),
@@ -31,6 +30,9 @@ afterEach(async () => {
 
 afterAll(async () => {
   // Close connection to free up resources on Neon
+  if (redisClient.isOpen) {
+    await redisClient.quit();
+  }
   await prisma.$disconnect();
 });
 

@@ -1,6 +1,7 @@
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 const { validationResult } = require("express-validator");
+const redisClient = require("../config/redisClient");
 
 const clearUserCache = async (userId) => {
   try {
