@@ -1,3 +1,14 @@
+jest.mock("../src/config/redisClient", () => ({
+  get: jest.fn(),
+  set: jest.fn(),
+  setEx: jest.fn(),
+  del: jest.fn(),
+  quit: jest.fn().mockResolvedValue(true),
+  connect: jest.fn().mockResolvedValue(true),
+  on: jest.fn(),
+  isOpen: true,
+}));
+
 const { PrismaClient } = require("../src/generated/prisma");
 const redisClient = require("../src/config/redisClient");
 
