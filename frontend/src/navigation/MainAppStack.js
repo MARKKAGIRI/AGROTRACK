@@ -15,6 +15,7 @@ import HelpSupport from "../screens/Profile/HelpSupport";
 import About from "../screens/Profile/About";
 import CropCycleScreen from "../screens/Lifecycle/CropCycle";
 import AnalyticsScreen from "../screens/Analytics/Analytics";
+import FarmFinancesScreen from "../screens/Analytics/FarmFinances";
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +47,19 @@ export default function MainAppStack() {
           headerTintColor: "#fff",
           headerStyle: {
             backgroundColor: "#2e7d32", // optional
+          },
+        }}
+      />
+
+      <Stack.Screen
+        name="FarmFinances"
+        component={FarmFinancesScreen}
+        options={{
+          title: "Farm Finances",
+          headerBackTitleVisible: false,
+          headerTintColor: "#fff",
+          headerStyle: {
+            backgroundColor: "#2e7d32",
           },
         }}
       />

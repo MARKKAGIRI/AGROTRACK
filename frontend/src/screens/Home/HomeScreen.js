@@ -12,6 +12,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../context/AuthContext";
 import SectionHeader from "../../components/SectionHeader";
+import { FarmFinancesScreen } from "../Analytics/FarmFinances";
 
 
 
@@ -226,9 +227,13 @@ const Home = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Farms Summary stats */}
+        /* Farms Summary stats */
         <View className="mt-4 space-y-4">
-          <SectionHeader title="Farm Summary" action="View Full Details" />
+          <SectionHeader
+            title="Farm Summary"
+            action="View Full Details"
+            onPress={() => navigation.navigate("FarmFinancesScreen")}
+          />
           {/* Existing Farm/Field Summary Card with Refined Styling */}
           <View className="bg-white rounded-3xl p-5 shadow-sm border border-gray-300">
             <View className="flex-row items-center mb-6">

@@ -7,7 +7,6 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 // Major screens
 
 import HomeScreen from "../screens/Home/HomeScreen";
-import Analytics from "../screens/Analytics/Analytics";
 import AllFarmsScreen from "../screens/Home/AllFarmsScreen"
 import Profile from "../screens/Profile/Profile";
 
